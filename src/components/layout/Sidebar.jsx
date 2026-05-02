@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard, User, Table2, Bell, CreditCard,
   BookOpen, LogIn, UserPlus, X, Menu, ChevronRight
@@ -23,14 +23,14 @@ const authItems = [
 const docsItem = { title: "Documentation", path: "/docs", icon: BookOpen };
 
 /**
- * NavItem - Item navigasi sidebar menggunakan React Router Link
+ * NavItem - Item navigasi sidebar menggunakan React Router NavLink
  */
-function NavItem({ item, isActive }) {
+function NavItem({ item }) {
   const Icon = item.icon;
   return (
-    <Link
+    <NavLink
       to={item.path}
-      className={[
+      className={({ isActive }) => [
         "flex items-center text-sm font-normal rounded-lg px-3 py-2 cursor-pointer transition-all duration-200 border",
         isActive
           ? "bg-blue-600 text-white to-stone-800 border-stone-900 text-stone-50 shadow-sm"
@@ -39,7 +39,7 @@ function NavItem({ item, isActive }) {
     >
       <Icon className="mr-3 w-4 h-4 flex-shrink-0" />
       {item.title}
-    </Link>
+    </NavLink>
   );
 }
 
@@ -49,8 +49,6 @@ function NavItem({ item, isActive }) {
  * @param {function} [props.onClose] - Callback untuk mobile close
  */
 export function Sidebar({ onClose }) {
-  const location = useLocation();
-
   return (
     <aside className="w-60 bg-white flex flex-col relative z-10 h-full border-r border-stone-200">
       {/* Brand */}
@@ -75,7 +73,6 @@ export function Sidebar({ onClose }) {
           <NavItem
             key={item.path}
             item={item}
-            isActive={location.pathname === item.path}
           />
         ))}
 
@@ -88,7 +85,6 @@ export function Sidebar({ onClose }) {
             <NavItem
               key={item.path}
               item={item}
-              isActive={location.pathname === item.path}
             />
           ))}
         </div>
@@ -97,7 +93,6 @@ export function Sidebar({ onClose }) {
         <div className="pt-4 border-t border-stone-200 mt-4 space-y-1">
           <NavItem
             item={docsItem}
-            isActive={location.pathname === docsItem.path}
           />
         </div>
       </nav>

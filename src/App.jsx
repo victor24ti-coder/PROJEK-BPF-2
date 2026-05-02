@@ -29,6 +29,21 @@ const pageTitleMap = {
 };
 
 /**
+ * NotFoundPage - Halaman 404 untuk route yang tidak ditemukan
+ */
+function NotFoundPage() {
+  return (
+    <div className="flex items-center justify-center h-full">
+      <div className="text-center">
+        <h1 className="text-6xl font-bold text-stone-900 mb-4">404</h1>
+        <p className="text-xl text-stone-600 mb-8">Page Not Found</p>
+        <p className="text-stone-500">The page you're looking for doesn't exist.</p>
+      </div>
+    </div>
+  );
+}
+
+/**
  * MainLayout - Komponen layout utama dengan sidebar, topbar, dan routes
  */
 function MainLayout() {
@@ -67,6 +82,7 @@ function MainLayout() {
             <Route path="/sign-in" element={<SignInPage />} />
             <Route path="/sign-up" element={<SignUpPage />} />
             <Route path="/docs" element={<DocsPage />} />
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </main>
       </div>
