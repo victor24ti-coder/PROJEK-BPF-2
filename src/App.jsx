@@ -1,74 +1,90 @@
 import { useState } from "react";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { Sidebar, TopBar, MobileOverlay } from "./components/layout/Sidebar";
 import { DashboardPage } from "./components/pages/DashboardPage";
+import { PelatihanPage } from "./components/pages/PelatihanPage";
+import { PemaganganPage } from "./components/pages/PemaganganPage";
+import { SertifikasiPage } from "./components/pages/SertifikasiPage";
+import { LPKPage } from "./components/pages/LPKPage";
+import { PerusahaanPage } from "./components/pages/PerusahaanPage";
+import { JobFairPage } from "./components/pages/JobFairPage";
+import { SignInPage } from "./components/pages/SignInPage";
+import { SignUpPage } from "./components/pages/SignUpPage";
+import { DocsPage } from "./components/pages/DocsPage";
 
 /**
- * App - Root komponen aplikasi Material Shadcn Dashboard
- *
- * Struktur:
- * - Sidebar kiri (navigasi)
- * - Konten utama (TopBar + halaman)
- * - MobileOverlay untuk sidebar mobile
+ * PageTitleMap - Mapping antara path dan judul halaman
  */
-export default function App() {
-  const [activePath, setActivePath] = useState("#dashboard");
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+const pageTitleMap = {
+  "/": "Dashboard",
+  "/pelatihan": "Pelatihan",
+  "/pemagangan": "Pemagangan",
+  "/sertifikasi": "Sertifikasi",
+  "/lpk": "LPK",
+  "/perusahaan": "Perusahaan",
+  "/jobfair": "Job Fair",
+  "/sign-in": "Sign In",
+  "/sign-up": "Sign Up",
+  "/docs": "Documentation",
+};
 
-  const pageTitle = {
-    "#dashboard": "Dashboard",
-    "#profile": "Profile",
-    "#tables": "Tables",
-    "#notifications": "Notifications",
-    "#subscriptions": "Subscriptions",
-    "#sign-in": "Sign In",
-    "#sign-up": "Sign Up",
-    "#docs": "Documentation",
-  }[activePath] || "Dashboard";
+/**
+ * MainLayout - Komponen layout utama dengan sidebar, topbar, dan routes
+ */
+function MainLayout() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const location = useLocation();
+
+  const pageTitle = pageTitleMap[location.pathname] || "Dashboard";
+
+  const handleMobileMenuClose = () => {
+    setMobileMenuOpen(false);
+  };
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden font-sans">
       {/* Sidebar Desktop */}
       <div className="hidden lg:flex flex-shrink-0">
-        <Sidebar activePath={activePath} onNavigate={setActivePath} />
+        <Sidebar />
       </div>
 
       {/* Mobile Sidebar Overlay */}
-      <MobileOverlay
-        isOpen={mobileMenuOpen}
-        onClose={() => setMobileMenuOpen(false)}
-        activePath={activePath}
-        onNavigate={setActivePath}
-      />
+      <MobileOverlay isOpen={mobileMenuOpen} onClose={handleMobileMenuClose} />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <TopBar title={pageTitle} onMenuOpen={() => setMobileMenuOpen(true)} />
 
         <main className="flex-1 overflow-hidden">
-          {activePath === "#dashboard" && <DashboardPage />}
-
-          {/* Placeholder pages */}
-          {activePath !== "#dashboard" && (
-            <div className="h-full flex items-center justify-center text-stone-500">
-              <div className="text-center">
-                <div className="text-5xl mb-4">🚧</div>
-                <p className="text-lg font-medium text-stone-700">
-                  {pageTitle} Page
-                </p>
-                <p className="text-sm text-stone-500 mt-1">
-                  Halaman ini belum diimplementasi. Fokus saat ini: Dashboard.
-                </p>
-                <button
-                  onClick={() => setActivePath("#dashboard")}
-                  className="mt-4 px-4 py-2 text-sm bg-stone-800 text-white rounded-lg hover:bg-stone-700 transition-colors"
-                >
-                  Kembali ke Dashboard
-                </button>
-              </div>
-            </div>
-          )}
+          <Routes>
+            <Route path="/" element={<DashboardPage />} />
+            <Route path="/pelatihan" element={<PelatihanPage />} />
+            <Route path="/pemagangan" element={<PemaganganPage />} />
+            <Route path="/sertifikasi" element={<SertifikasiPage />} />
+            <Route path="/lpk" element={<LPKPage />} />
+            <Route path="/perusahaan" element={<PerusahaanPage />} />
+            <Route path="/jobfair" element={<JobFairPage />} />
+            <Route path="/sign-in" element={<SignInPage />} />
+            <Route path="/sign-up" element={<SignUpPage />} />
+            <Route path="/docs" element={<DocsPage />} />
+          </Routes>
         </main>
       </div>
     </div>
+  );
+}
+
+/**
+ * App - Root komponen aplikasi dengan React Router
+ *
+ * Struktur:
+ * - BrowserRouter untuk routing
+ * - MainLayout yang berisi Sidebar, TopBar, dan Routes
+ */
+export default function App() {
+  return (
+    <BrowserRouter>
+      <MainLayout />
+    </BrowserRouter>
   );
 }

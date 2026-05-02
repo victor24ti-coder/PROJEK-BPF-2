@@ -1,35 +1,35 @@
 import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, User, Table2, Bell, CreditCard,
   BookOpen, LogIn, UserPlus, X, Menu, ChevronRight
 } from "lucide-react";
 
 const navItems = [
-  { title: "Dashboard", href: "#dashboard", icon: LayoutDashboard },
-  { title: "Pelatihan", href: "#pelatihan", icon: BookOpen },
-  { title: "Pemagangan", href: "#pemagangan", icon: User },
-  { title: "Sertifikasi", href: "#sertifikasi", icon: CreditCard },
-  { title: "LPK", href: "#lpk", icon: Table2 },
-  { title: "Perusahaan", href: "#perusahaan", icon: User },
-  { title: "Job Fair", href: "#jobfair", icon: Bell },
+  { title: "Dashboard", path: "/", icon: LayoutDashboard },
+  { title: "Pelatihan", path: "/pelatihan", icon: BookOpen },
+  { title: "Pemagangan", path: "/pemagangan", icon: User },
+  { title: "Sertifikasi", path: "/sertifikasi", icon: CreditCard },
+  { title: "LPK", path: "/lpk", icon: Table2 },
+  { title: "Perusahaan", path: "/perusahaan", icon: User },
+  { title: "Job Fair", path: "/jobfair", icon: Bell },
 ];
 
 const authItems = [
-  { title: "Sign In", href: "#sign-in", icon: LogIn },
-  { title: "Sign Up", href: "#sign-up", icon: UserPlus },
+  { title: "Sign In", path: "/sign-in", icon: LogIn },
+  { title: "Sign Up", path: "/sign-up", icon: UserPlus },
 ];
 
-const docsItem = { title: "Documentation", href: "#docs", icon: BookOpen };
+const docsItem = { title: "Documentation", path: "/docs", icon: BookOpen };
 
 /**
- * NavItem - Item navigasi sidebar
+ * NavItem - Item navigasi sidebar menggunakan React Router Link
  */
-function NavItem({ item, isActive, onClick }) {
+function NavItem({ item, isActive }) {
   const Icon = item.icon;
   return (
-    <a
-      href={item.href}
-      onClick={(e) => { e.preventDefault(); onClick && onClick(item.href); }}
+    <Link
+      to={item.path}
       className={[
         "flex items-center text-sm font-normal rounded-lg px-3 py-2 cursor-pointer transition-all duration-200 border",
         isActive
@@ -39,18 +39,18 @@ function NavItem({ item, isActive, onClick }) {
     >
       <Icon className="mr-3 w-4 h-4 flex-shrink-0" />
       {item.title}
-    </a>
+    </Link>
   );
 }
 
 /**
- * Sidebar - Komponen navigasi sidebar kiri
+ * Sidebar - Komponen navigasi sidebar kiri menggunakan React Router
  * @param {Object} props
  * @param {function} [props.onClose] - Callback untuk mobile close
- * @param {string} props.activePath - Path aktif saat ini
- * @param {function} props.onNavigate - Callback navigasi
  */
-export function Sidebar({ onClose, activePath, onNavigate }) {
+export function Sidebar({ onClose }) {
+  const location = useLocation();
+
   return (
     <aside className="w-60 bg-white flex flex-col relative z-10 h-full border-r border-stone-200">
       {/* Brand */}
@@ -73,10 +73,9 @@ export function Sidebar({ onClose, activePath, onNavigate }) {
       <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
         {navItems.map((item) => (
           <NavItem
-            key={item.href}
+            key={item.path}
             item={item}
-            isActive={activePath === item.href}
-            onClick={onNavigate}
+            isActive={location.pathname === item.path}
           />
         ))}
 
@@ -87,10 +86,9 @@ export function Sidebar({ onClose, activePath, onNavigate }) {
           </p>
           {authItems.map((item) => (
             <NavItem
-              key={item.href}
+              key={item.path}
               item={item}
-              isActive={activePath === item.href}
-              onClick={onNavigate}
+              isActive={location.pathname === item.path}
             />
           ))}
         </div>
@@ -99,8 +97,7 @@ export function Sidebar({ onClose, activePath, onNavigate }) {
         <div className="pt-4 border-t border-stone-200 mt-4 space-y-1">
           <NavItem
             item={docsItem}
-            isActive={activePath === docsItem.href}
-            onClick={onNavigate}
+            isActive={location.pathname === docsItem.path}
           />
         </div>
       </nav>
@@ -141,15 +138,15 @@ export function TopBar({ title, onMenuOpen }) {
 }
 
 /**
- * MobileOverlay - Overlay sidebar untuk mobile
+ * MobileOverlay - Overlay sidebar untuk mobile dengan React Router
  */
-export function MobileOverlay({ isOpen, onClose, activePath, onNavigate }) {
+export function MobileOverlay({ isOpen, onClose }) {
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 z-50 lg:hidden">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       <div className="absolute left-0 top-0 bottom-0 w-60 shadow-xl">
-        <Sidebar onClose={onClose} activePath={activePath} onNavigate={(href) => { onNavigate(href); onClose(); }} />
+        <Sidebar onClose={onClose} />
       </div>
     </div>
   );
