@@ -1,7 +1,7 @@
 /**
  * PelatihanPage - Halaman Pelatihan
  */
-export function PelatihanPage() {
+export default function PelatihanPage() {
   return (
     <div className="h-full overflow-y-auto p-6">
       <div className="bg-white rounded-lg border border-stone-200 p-6">

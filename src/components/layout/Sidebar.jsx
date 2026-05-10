@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import {
   LayoutDashboard, User, Table2, Bell, CreditCard,
-  BookOpen, LogIn, UserPlus, X, Menu, ChevronRight
+  BookOpen, LogIn, UserPlus, X, Menu, ChevronRight, LogOut
 } from "lucide-react";
 
 const navItems = [
@@ -44,19 +45,25 @@ function NavItem({ item }) {
 }
 
 /**
- * Sidebar - Komponen navigasi sidebar kiri menggunakan React Router
+ * Sidebar - Komponen navigasi sidebar kiri menggunakan React Router dan Auth Context
  * @param {Object} props
  * @param {function} [props.onClose] - Callback untuk mobile close
  */
 export function Sidebar({ onClose }) {
+  const { isAuthenticated, user, logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+  };
+
   return (
     <aside className="w-60 bg-white flex flex-col relative z-10 h-full border-r border-stone-200">
       {/* Brand */}
       <div className="p-6 pb-0 flex items-center justify-between">
         <h1 className="text-lg font-semibold text-stone-900">
           <span className="text-blue-600 font-bold">SIMANDAT </span>
-          <span className="text-green-500 font-bold">DISNAKER</span>{" "}
-          </h1>
+          <span className="text-green-500 font-bold">DISNAKER</span>
+        </h1>
         {onClose && (
           <button
             onClick={onClose}
@@ -69,41 +76,81 @@ export function Sidebar({ onClose }) {
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-        {navItems.map((item) => (
+        {isAuthenticated && navItems.map((item) => (
           <NavItem
             key={item.path}
             item={item}
           />
         ))}
 
-        {/* Auth Section */}
-        <div className="pt-4 border-t border-stone-200 mt-4 space-y-1">
-          <p className="px-4 text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">
-            Auth Pages
-          </p>
-          {authItems.map((item) => (
-            <NavItem
-              key={item.path}
-              item={item}
-            />
-          ))}
-        </div>
+        {/* Auth Section - Hanya tampil jika tidak authenticated */}
+        {!isAuthenticated && (
+          <div className="pt-4 border-t border-stone-200 mt-4 space-y-1">
+            <p className="px-4 text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">
+              Auth Pages
+            </p>
+            {authItems.map((item) => (
+              <NavItem
+                key={item.path}
+                item={item}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Docs */}
-        <div className="pt-4 border-t border-stone-200 mt-4 space-y-1">
-          <NavItem
-            item={docsItem}
-          />
-        </div>
+        {isAuthenticated && (
+          <div className="pt-4 border-t border-stone-200 mt-4 space-y-1">
+            <NavItem
+              item={docsItem}
+            />
+          </div>
+        )}
       </nav>
+
+      {/* User Info & Logout - Tampil jika authenticated */}
+      {isAuthenticated && (
+        <div className="p-4 border-t border-stone-200 bg-stone-50">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2 flex-1">
+              <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-semibold">
+                {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-stone-900 truncate">
+                  {user?.name || 'User'}
+                </p>
+                <p className="text-xs text-stone-500 truncate">
+                  {user?.email || 'user@example.com'}
+                </p>
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-200"
+          >
+            <LogOut className="w-4 h-4" />
+            Logout
+          </button>
+        </div>
+      )}
     </aside>
   );
 }
 
 /**
- * TopBar - Navbar atas dengan judul halaman dan tombol hamburger mobile
+ * TopBar - Navbar atas dengan judul halaman, tombol hamburger mobile, dan user info
  */
 export function TopBar({ title, onMenuOpen }) {
+  const { user, isAuthenticated, logout } = useAuth();
+  const [showUserMenu, setShowUserMenu] = useState(false);
+
+  const handleLogout = async () => {
+    await logout();
+    setShowUserMenu(false);
+  };
+
   return (
     <header className="h-14 bg-white/80 backdrop-blur-sm border-b border-stone-200 px-4 flex items-center justify-between flex-shrink-0">
       <div className="flex items-center gap-2">
@@ -120,12 +167,43 @@ export function TopBar({ title, onMenuOpen }) {
         </div>
       </div>
       <div className="flex items-center gap-3">
-        <button className="flex items-center gap-2 text-sm text-stone-700 hover:text-stone-900 transition-colors">
-          <div className="w-7 h-7 rounded-full bg-stone-800 text-white flex items-center justify-center text-xs font-semibold">
-            A
+        {isAuthenticated && user ? (
+          <div className="relative">
+            <button
+              onClick={() => setShowUserMenu(!showUserMenu)}
+              className="flex items-center gap-2 text-sm text-stone-700 hover:text-stone-900 transition-colors"
+            >
+              <div className="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-semibold">
+                {user.name?.charAt(0)?.toUpperCase() || 'U'}
+              </div>
+              <span className="hidden sm:block">{user.name || 'User'}</span>
+            </button>
+
+            {/* Dropdown Menu */}
+            {showUserMenu && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-stone-200 py-2 z-50">
+                <div className="px-4 py-2 border-b border-stone-200">
+                  <p className="font-medium text-stone-900 text-sm">{user.name}</p>
+                  <p className="text-xs text-stone-500">{user.email}</p>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </button>
+              </div>
+            )}
           </div>
-          <span className="hidden sm:block">Admin</span>
-        </button>
+        ) : (
+          <button className="flex items-center gap-2 text-sm text-stone-700 hover:text-stone-900 transition-colors">
+            <div className="w-7 h-7 rounded-full bg-stone-800 text-white flex items-center justify-center text-xs font-semibold">
+              A
+            </div>
+            <span className="hidden sm:block">Guest</span>
+          </button>
+        )}
         <Bell className="w-4 h-4 text-stone-500 cursor-pointer hover:text-stone-900 transition-colors" />
       </div>
     </header>

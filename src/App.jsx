@@ -1,31 +1,41 @@
-import { useState } from "react";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import { Sidebar, TopBar, MobileOverlay } from "./components/layout/Sidebar";
-import { DashboardPage } from "./components/pages/DashboardPage";
-import { PelatihanPage } from "./components/pages/PelatihanPage";
-import { PemaganganPage } from "./components/pages/PemaganganPage";
-import { SertifikasiPage } from "./components/pages/SertifikasiPage";
-import { LPKPage } from "./components/pages/LPKPage";
-import { PerusahaanPage } from "./components/pages/PerusahaanPage";
-import { JobFairPage } from "./components/pages/JobFairPage";
-import { SignInPage } from "./components/pages/SignInPage";
-import { SignUpPage } from "./components/pages/SignUpPage";
-import { DocsPage } from "./components/pages/DocsPage";
+import { lazy, Suspense, useState } from 'react';
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { PrivateRoute, PublicRoute } from './components/PrivateRoute';
+import { AuthLayout } from './components/layout/AuthLayout';
+import { Sidebar, TopBar, MobileOverlay } from './components/layout/Sidebar';
+import LoadingFallback from './components/LoadingFallback';
+
+/**
+ * Lazy Load Components - Untuk code splitting dan performance optimization
+ * 
+ * Setiap page di-load hanya ketika dibutuhkan, bukan saat aplikasi dimulai
+ */
+const DashboardPage = lazy(() => import('./components/pages/DashboardPage'));
+const PelatihanPage = lazy(() => import('./components/pages/PelatihanPage'));
+const PemaganganPage = lazy(() => import('./components/pages/PemaganganPage'));
+const SertifikasiPage = lazy(() => import('./components/pages/SertifikasiPage'));
+const LPKPage = lazy(() => import('./components/pages/LPKPage'));
+const PerusahaanPage = lazy(() => import('./components/pages/PerusahaanPage'));
+const JobFairPage = lazy(() => import('./components/pages/JobFairPage'));
+const DocsPage = lazy(() => import('./components/pages/DocsPage'));
+
+// Sign In dan Sign Up juga di-lazy load, tapi bisa di-import langsung jika perlu
+const SignInPage = lazy(() => import('./components/pages/SignInPage'));
+const SignUpPage = lazy(() => import('./components/pages/SignUpPage'));
 
 /**
  * PageTitleMap - Mapping antara path dan judul halaman
  */
 const pageTitleMap = {
-  "/": "Dashboard",
-  "/pelatihan": "Pelatihan",
-  "/pemagangan": "Pemagangan",
-  "/sertifikasi": "Sertifikasi",
-  "/lpk": "LPK",
-  "/perusahaan": "Perusahaan",
-  "/jobfair": "Job Fair",
-  "/sign-in": "Sign In",
-  "/sign-up": "Sign Up",
-  "/docs": "Documentation",
+  '/': 'Dashboard',
+  '/pelatihan': 'Pelatihan',
+  '/pemagangan': 'Pemagangan',
+  '/sertifikasi': 'Sertifikasi',
+  '/lpk': 'LPK',
+  '/perusahaan': 'Perusahaan',
+  '/jobfair': 'Job Fair',
+  '/docs': 'Documentation',
 };
 
 /**
@@ -44,13 +54,15 @@ function NotFoundPage() {
 }
 
 /**
- * MainLayout - Komponen layout utama dengan sidebar, topbar, dan routes
+ * DashboardLayout - Layout untuk dashboard dengan sidebar dan topbar
+ * 
+ * Multi-layout pattern: Sidebar + TopBar + Content
  */
-function MainLayout() {
+function DashboardLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
 
-  const pageTitle = pageTitleMap[location.pathname] || "Dashboard";
+  const pageTitle = pageTitleMap[location.pathname] || 'Dashboard';
 
   const handleMobileMenuClose = () => {
     setMobileMenuOpen(false);
@@ -71,19 +83,20 @@ function MainLayout() {
         <TopBar title={pageTitle} onMenuOpen={() => setMobileMenuOpen(true)} />
 
         <main className="flex-1 overflow-hidden">
-          <Routes>
-            <Route path="/" element={<DashboardPage />} />
-            <Route path="/pelatihan" element={<PelatihanPage />} />
-            <Route path="/pemagangan" element={<PemaganganPage />} />
-            <Route path="/sertifikasi" element={<SertifikasiPage />} />
-            <Route path="/lpk" element={<LPKPage />} />
-            <Route path="/perusahaan" element={<PerusahaanPage />} />
-            <Route path="/jobfair" element={<JobFairPage />} />
-            <Route path="/sign-in" element={<SignInPage />} />
-            <Route path="/sign-up" element={<SignUpPage />} />
-            <Route path="/docs" element={<DocsPage />} />
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
+          {/* Suspense untuk lazy loading pages */}
+          <Suspense fallback={<LoadingFallback />}>
+            <Routes>
+              <Route path="/" element={<DashboardPage />} />
+              <Route path="/pelatihan" element={<PelatihanPage />} />
+              <Route path="/pemagangan" element={<PemaganganPage />} />
+              <Route path="/sertifikasi" element={<SertifikasiPage />} />
+              <Route path="/lpk" element={<LPKPage />} />
+              <Route path="/perusahaan" element={<PerusahaanPage />} />
+              <Route path="/jobfair" element={<JobFairPage />} />
+              <Route path="/docs" element={<DocsPage />} />
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </Suspense>
         </main>
       </div>
     </div>
@@ -91,16 +104,87 @@ function MainLayout() {
 }
 
 /**
- * App - Root komponen aplikasi dengan React Router
+ * AppRoutes - Routes utama aplikasi dengan logic autentikasi
+ * 
+ * Nested Routes Pattern:
+ * - Routes untuk auth dibungkus dengan PublicRoute
+ * - Routes untuk dashboard dibungkus dengan PrivateRoute
+ * - Menggunakan Suspense untuk lazy loading
+ */
+function AppRoutes() {
+  const { isLoading } = useAuth();
+
+  // Jika auth masih loading, tampilkan loading fallback
+  if (isLoading) {
+    return <LoadingFallback />;
+  }
+
+  return (
+    <Routes>
+      {/* Public Routes - Auth Layout */}
+      <Route
+        path="/sign-in"
+        element={
+          <PublicRoute>
+            <Suspense fallback={<LoadingFallback />}>
+              <SignInPage />
+            </Suspense>
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/sign-up"
+        element={
+          <PublicRoute>
+            <Suspense fallback={<LoadingFallback />}>
+              <SignUpPage />
+            </Suspense>
+          </PublicRoute>
+        }
+      />
+
+      {/* Private Routes - Dashboard Layout dengan nested routes */}
+      <Route
+        path="/*"
+        element={
+          <PrivateRoute>
+            <DashboardLayout />
+          </PrivateRoute>
+        }
+      />
+    </Routes>
+  );
+}
+
+/**
+ * App - Root komponen aplikasi
  *
  * Struktur:
  * - BrowserRouter untuk routing
- * - MainLayout yang berisi Sidebar, TopBar, dan Routes
+ * - AuthProvider untuk state management autentikasi
+ * - AppRoutes yang berisi semua routes dengan lazy loading
+ * 
+ * Fitur:
+ * 1. Multi Layout & Nested Routes:
+ *    - AuthLayout untuk sign-in/sign-up
+ *    - DashboardLayout untuk dashboard pages
+ *    - Nested routes di dalam DashboardLayout
+ * 
+ * 2. Lazy Loading + Suspense:
+ *    - Setiap page di-lazy load dengan React.lazy()
+ *    - Suspense wrapper dengan LoadingFallback
+ * 
+ * 3. Login API + Axios:
+ *    - AuthContext menyediakan login/signup functions
+ *    - API service dengan axios interceptors
+ *    - PrivateRoute untuk protect dashboard routes
  */
 export default function App() {
   return (
     <BrowserRouter>
-      <MainLayout />
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
     </BrowserRouter>
   );
 }
