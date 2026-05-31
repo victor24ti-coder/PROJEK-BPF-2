@@ -19,6 +19,7 @@ const LPKPage = lazy(() => import('./components/pages/LPKPage'));
 const PerusahaanPage = lazy(() => import('./components/pages/PerusahaanPage'));
 const JobFairPage = lazy(() => import('./components/pages/JobFairPage'));
 const DocsPage = lazy(() => import('./components/pages/DocsPage'));
+const PelatihanDetailPage = lazy(() => import('./components/pages/PelatihanDetailPage'));
 
 // Sign In dan Sign Up juga di-lazy load, tapi bisa di-import langsung jika perlu
 const SignInPage = lazy(() => import('./components/pages/SignInPage'));
@@ -62,7 +63,10 @@ function DashboardLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
 
-  const pageTitle = pageTitleMap[location.pathname] || 'Dashboard';
+  let pageTitle = pageTitleMap[location.pathname] || 'Dashboard';
+  if (location.pathname.startsWith('/pelatihan/')) {
+    pageTitle = 'Detail Pelatihan';
+  }
 
   const handleMobileMenuClose = () => {
     setMobileMenuOpen(false);
@@ -94,6 +98,7 @@ function DashboardLayout() {
               <Route path="/perusahaan" element={<PerusahaanPage />} />
               <Route path="/jobfair" element={<JobFairPage />} />
               <Route path="/docs" element={<DocsPage />} />
+              <Route path="/pelatihan/:id" element={<PelatihanDetailPage />} />
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </Suspense>

@@ -1,0 +1,162 @@
+[
+  {
+    "id": 1,
+    "title": "Pelatihan Teknik Las Industri (SMAW 3G)",
+    "category": "Teknik Las",
+    "lpk": "LPK Riau Welder Center",
+    "duration": "240 JP",
+    "quota": 20,
+    "participantsCount": 18,
+    "instructor": "Budi Santoso, S.T.",
+    "status": "Berjalan",
+    "startDate": "10 Mei 2026",
+    "endDate": "20 Juni 2026",
+    "description": "Program pelatihan pengelasan SMAW posisi 3G (vertikal) yang dirancang untuk menghasilkan juru las berkualifikasi industri manufaktur dan konstruksi perkapalan.",
+    "syllabus": [
+      "Teori K3 Las Industri",
+      "Persiapan dan Penyetelan Mesin Las",
+      "Teknik Pengelasan Lapisan Pengisi (Fill Pass)",
+      "Teknik Pengelasan Jalur Penutup (Capping Pass)",
+      "Pengujian Visual dan Uji Destruktif Hasil Lasan"
+    ],
+    "trainees": [
+      { "id": "TR-101", "name": "Ahmad Fauzi", "gender": "Laki-laki", "status": "Belum Bekerja" },
+      { "id": "TR-102", "name": "Rian Hidayat", "gender": "Laki-laki", "status": "Belum Bekerja" },
+      { "id": "TR-103", "name": "Bagus Prasetyo", "gender": "Laki-laki", "status": "Belum Bekerja" },
+      { "id": "TR-104", "name": "Ferry Kurniawan", "gender": "Laki-laki", "status": "Belum Bekerja" }
+    ]
+  },
+  {
+    "id": 2,
+    "title": "Pelatihan Teknisi Otomotif Sepeda Motor",
+    "category": "Teknik Otomotif",
+    "lpk": "LPK Auto Mandiri Riau",
+    "duration": "200 JP",
+    "quota": 25,
+    "participantsCount": 25,
+    "instructor": "Drs. Heri Susanto",
+    "status": "Pendaftaran",
+    "startDate": "15 Juni 2026",
+    "endDate": "20 Juli 2026",
+    "description": "Membekali peserta dengan keterampilan melakukan perawatan berkala, diagnosis kerusakan sistem kelistrikan dan mesin, serta perbaikan sepeda motor injeksi terkini.",
+    "syllabus": [
+      "Pengenalan Komponen & Engine Tuning",
+      "Sistem Bahan Bakar Injeksi (PGM-FI)",
+      "Sistem Transmisi Otomatis (CVT)",
+      "Sistem Kelistrikan dan Pengapian",
+      "Kewirausahaan Perbengkelan"
+    ],
+    "trainees": [
+      { "id": "TR-201", "name": "Dimas Saputra", "gender": "Laki-laki", "status": "Belum Bekerja" },
+      { "id": "TR-202", "name": "Eko Wahyudi", "gender": "Laki-laki", "status": "Belum Bekerja" },
+      { "id": "TR-203", "name": "Siti Nurhaliza", "gender": "Perempuan", "status": "Belum Bekerja" }
+    ]
+  },
+  {
+    "id": 3,
+    "title": "Pelatihan Desain Grafis & Digital Marketing",
+    "category": "Teknik Informasi",
+    "lpk": "LPK Riau Kreatif Solusi",
+    "duration": "160 JP",
+    "quota": 20,
+    "participantsCount": 15,
+    "instructor": "Rina Amelia, A.Md.",
+    "status": "Berjalan",
+    "startDate": "02 Mei 2026",
+    "endDate": "05 Juni 2026",
+    "description": "Pengembangan keahlian mendesain aset visual promosi menggunakan software desain profesional serta pengelolaan kampanye digital marketing melalui media sosial.",
+    "syllabus": [
+      "Prinsip Desain Grafis dan Layouting",
+      "Adobe Illustrator & Photoshop Dasar",
+      "Penyusunan Konten Copywriting",
+      "Pengiklanan Digital (Meta Ads & Google Ads)",
+      "Analisis Optimasi SEO Dasar"
+    ],
+    "trainees": [
+      { "id": "TR-301", "name": "Dewi Sartika", "gender": "Perempuan", "status": "Bekerja" },
+      { "id": "TR-302", "name": "Hendra Wijaya", "gender": "Laki-laki", "status": "Wirausaha" },
+      { "id": "TR-303", "name": "Mega Puspita", "gender": "Perempuan", "status": "Belum Bekerja" },
+      { "id": "TR-304", "name": "Rizky Ramadhan", "gender": "Laki-laki", "status": "Wirausaha" }
+    ]
+  },
+  {
+    "id": 4,
+    "title": "Pelatihan Operator Komputer Kantor",
+    "category": "Teknik Informasi",
+    "lpk": "LPK Sentra Komputer Pekanbaru",
+    "duration": "120 JP",
+    "quota": 30,
+    "participantsCount": 30,
+    "instructor": "Yuni Lestari, S.Kom.",
+    "status": "Selesai",
+    "startDate": "01 April 2026",
+    "endDate": "30 April 2026",
+    "description": "Mempersiapkan tenaga kerja administrasi perkantoran yang kompeten dalam menggunakan perangkat lunak perkantoran, pengolahan data spreadsheet tingkat lanjut, dan kearsipan digital.",
+    "syllabus": [
+      "Dasar Pengolahan Dokumen Word",
+      "Analisis Data Menggunakan Microsoft Excel",
+      "Teknik Presentasi Profesional PowerPoint",
+      "Manajemen Berkas & Kearsipan Cloud",
+      "Korespondensi Bisnis dan Email Formal"
+    ],
+    "trainees": [
+      { "id": "TR-401", "name": "Siti Aminah", "gender": "Perempuan", "status": "Bekerja" },
+      { "id": "TR-402", "name": "Ilham Syahputra", "gender": "Laki-laki", "status": "Bekerja" },
+      { "id": "TR-403", "name": "Putri Handayani", "gender": "Perempuan", "status": "Belum Bekerja" },
+      { "id": "TR-404", "name": "Andi Setiawan", "gender": "Laki-laki", "status": "Bekerja" }
+    ]
+  },
+  {
+    "id": 5,
+    "title": "Pelatihan Instalasi Penerangan & Listrik Industri",
+    "category": "Kelistrikan",
+    "lpk": "LPK Electro Power Riau",
+    "duration": "240 JP",
+    "quota": 20,
+    "participantsCount": 16,
+    "instructor": "Ir. M. Dahlan",
+    "status": "Berjalan",
+    "startDate": "18 Mei 2026",
+    "endDate": "28 Juni 2026",
+    "description": "Menghasilkan teknisi kelistrikan gedung bertingkat dan pabrik yang andal, mencakup pembacaan diagram satu garis, pemasangan PHB, dan pemrograman PLC dasar.",
+    "syllabus": [
+      "Teori K3 Listrik & Standardisasi PUIL",
+      "Instalasi Kabel Penerangan Rumah/Gedung",
+      "Pemasangan Panel Hubung Bagi (PHB)",
+      "Pengenalan Motor Listrik & Control Magnetik",
+      "Dasar Pemrograman PLC OMRON"
+    ],
+    "trainees": [
+      { "id": "TR-501", "name": "Roni Saputra", "gender": "Laki-laki", "status": "Belum Bekerja" },
+      { "id": "TR-502", "name": "Fajar Hidayatullah", "gender": "Laki-laki", "status": "Belum Bekerja" },
+      { "id": "TR-503", "name": "Doni Arman", "gender": "Laki-laki", "status": "Belum Bekerja" }
+    ]
+  },
+  {
+    "id": 6,
+    "title": "Pelatihan Tata Boga & Pembuatan Roti Kue",
+    "category": "Tata Boga",
+    "lpk": "LPK Roti & Kuliner Mandiri",
+    "duration": "180 JP",
+    "quota": 20,
+    "participantsCount": 20,
+    "instructor": "Chef Farah Nabila",
+    "status": "Selesai",
+    "startDate": "10 Maret 2026",
+    "endDate": "15 April 2026",
+    "description": "Menumbuhkan jiwa wirausaha mandiri di bidang kuliner melalui teknik pengolahan roti, kue tradisional, kue modern, serta cara pengemasan dan perhitungan harga jual makanan.",
+    "syllabus": [
+      "Higienitas Sanitasi Makanan & K3 Dapur",
+      "Teknik Pembuatan Aneka Roti Manis",
+      "Pembuatan Kue Basah dan Tradisional Riau",
+      "Pembuatan Pastry dan Cake Dekorasi",
+      "Perhitungan Food Costing & Pemasaran Kuliner"
+    ],
+    "trainees": [
+      { "id": "TR-601", "name": "Indah Lestari", "gender": "Perempuan", "status": "Wirausaha" },
+      { "id": "TR-602", "name": "Rina Wulandari", "gender": "Perempuan", "status": "Wirausaha" },
+      { "id": "TR-603", "name": "Dewi Fortuna", "gender": "Perempuan", "status": "Belum Bekerja" },
+      { "id": "TR-604", "name": "Yusuf Habibie", "gender": "Laki-laki", "status": "Wirausaha" }
+    ]
+  }
+]
