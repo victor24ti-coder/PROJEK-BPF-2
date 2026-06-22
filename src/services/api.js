@@ -9,7 +9,7 @@ import axios from 'axios';
 
 // Membuat instance axios dengan konfigurasi default
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -38,8 +38,8 @@ API.interceptors.request.use(
 API.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Jika token expired, redirect ke login
-    if (error.response?.status === 401) {
+    // Jika token expired (dan bukan request login), redirect ke login
+    if (error.response?.status === 401 && !error.config?.url?.endsWith('/login')) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/sign-in';
@@ -52,36 +52,17 @@ API.interceptors.response.use(
  * Auth API Endpoints
  */
 export const authAPI = {
-  login: (username, password) => {
-    if (username === 'test' && password === 'test123') {
-      return Promise.resolve({
-        data: {
-          accessToken: 'mock-token-test-123',
-          refreshToken: 'mock-refresh-test-123',
-          id: 999,
-          username: 'test',
-          email: 'test@example.com',
-          firstName: 'Test',
-          lastName: 'User',
-          image: '',
-        },
-      });
-    }
-
-    return axios.post('https://dummyjson.com/user/login', {
-      username,
-      password,
-      expiresInMins: 60,
-    });
+  login: (email, password) => {
+    return API.post('/login', { email, password });
   },
   signup: (userData) => {
     return API.post('/auth/signup', userData);
   },
   logout: () => {
-    return API.post('/auth/logout');
+    return API.post('/logout');
   },
   getCurrentUser: () => {
-    return API.get('/auth/me');
+    return API.get('/me');
   },
 };
 
@@ -116,6 +97,41 @@ export const sertifikasiAPI = {
   create: (data) => API.post('/sertifikasi', data),
   update: (id, data) => API.put(`/sertifikasi/${id}`, data),
   delete: (id) => API.delete(`/sertifikasi/${id}`),
+};
+
+// ── Perusahaan Mitra ──────────────────────────────────────────
+export const perusahaanAPI = {
+  getAll:  (search = '') => API.get(`/perusahaan-mitra?search=${search}`),
+  getById: (id)          => API.get(`/perusahaan-mitra/${id}`),
+  create:  (data)        => API.post('/perusahaan-mitra', data),
+  update:  (id, data)    => API.put(`/perusahaan-mitra/${id}`, data),
+  delete:  (id)          => API.delete(`/perusahaan-mitra/${id}`),
+};
+
+// ── LPK ──────────────────────────────────────────
+export const lpkAPI = {
+  getAll: (paginate = 'true') => API.get(`/lpk?paginate=${paginate}`),
+};
+
+// ── Tenaga Kerja ──────────────────────────────────────────
+export const tenagaKerjaAPI = {
+  getAll: (paginate = 'true', search = '') => API.get(`/tenaga-kerja?paginate=${paginate}&search=${search}`),
+};
+
+// ── Peserta Pelatihan ──────────────────────────────────────────
+export const pesertaPelatihanAPI = {
+  create: (data)        => API.post('/peserta-pelatihan', data),
+  update: (id, data)    => API.put(`/peserta-pelatihan/${id}`, data),
+  delete: (id)          => API.delete(`/peserta-pelatihan/${id}`),
+};
+
+// ── Tracer Study ──────────────────────────────────────────
+export const tracerStudyAPI = {
+  getAll:  (search = '') => API.get(`/tracer-study?search=${search}`),
+  getById: (id)          => API.get(`/tracer-study/${id}`),
+  create:  (data)        => API.post('/tracer-study', data),
+  update:  (id, data)    => API.put(`/tracer-study/${id}`, data),
+  delete:  (id)          => API.delete(`/tracer-study/${id}`),
 };
 
 export default API;

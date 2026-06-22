@@ -3,7 +3,7 @@ import { useState } from "react";
   import { useAuth } from "../../context/AuthContext";
   import {
     LayoutDashboard, User, Table2, Bell, CreditCard,
-    BookOpen, LogIn, UserPlus, X, Menu, ChevronRight, LogOut
+    BookOpen, LogIn, UserPlus, X, Menu, ChevronRight, LogOut, Compass
   } from "lucide-react";
 
   const navItems = [
@@ -14,6 +14,7 @@ import { useState } from "react";
     { title: "LPK", path: "/lpk", icon: Table2 },
     { title: "Perusahaan", path: "/perusahaan", icon: User },
     { title: "Job Fair", path: "/jobfair", icon: Bell },
+    { title: "Tracer Study", path: "/tracer-study", icon: Compass },
   ];
 
   const authItems = [

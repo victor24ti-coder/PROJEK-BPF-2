@@ -13,7 +13,7 @@ import { useAuth } from '../../context/AuthContext';
  */
 export default function SignInPage() {
   const [formData, setFormData] = useState({
-    username: '',
+    email: '',
     password: '',
   });
   const [errors, setErrors] = useState({});
@@ -46,8 +46,10 @@ export default function SignInPage() {
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.username) {
-      newErrors.username = 'Username is required';
+    if (!formData.email) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Email is invalid';
     }
 
     if (!formData.password) {
@@ -74,7 +76,7 @@ export default function SignInPage() {
 
     try {
       setIsLoading(true);
-      const result = await login(formData.username, formData.password);
+      const result = await login(formData.email, formData.password);
 
       if (result.success) {
         // Redirect ke dashboard
@@ -110,23 +112,23 @@ export default function SignInPage() {
 
           {/* Email Input */}
           <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
-              Username
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              Email Address
             </label>
             <input
-              type="text"
-              id="username"
-              name="username"
-              value={formData.username}
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
               onChange={handleChange}
               className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                errors.username ? 'border-red-500' : 'border-gray-300'
+                errors.email ? 'border-red-500' : 'border-gray-300'
               }`}
-              placeholder="test"
+              placeholder="admin@example.com"
               disabled={isLoading}
             />
-            {errors.username && (
-              <p className="text-red-500 text-sm mt-1">{errors.username}</p>
+            {errors.email && (
+              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
             )}
           </div>
 
@@ -172,9 +174,9 @@ export default function SignInPage() {
         {/* Demo Account Info */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-gray-700 mb-6">
           <p className="font-medium text-blue-900 mb-1">Demo Account:</p>
-          <p>Username: test</p>
-          <p>Password: test123</p>
-          <p className="text-gray-500 text-xs mt-2">Kredensial ini sudah didukung secara lokal di aplikasi.</p>
+          <p>Email: admin@example.com</p>
+          <p>Password: password123</p>
+          <p className="text-gray-500 text-xs mt-2">Kredensial ini telah ditambahkan ke database backend Anda.</p>
         </div>
 
         {/* Sign Up Link */}

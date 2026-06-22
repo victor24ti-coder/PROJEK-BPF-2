@@ -20,6 +20,7 @@ const PerusahaanPage = lazy(() => import('./components/pages/PerusahaanPage'));
 const JobFairPage = lazy(() => import('./components/pages/JobFairPage'));
 const DocsPage = lazy(() => import('./components/pages/DocsPage'));
 const PelatihanDetailPage = lazy(() => import('./components/pages/PelatihanDetailPage'));
+const TracerStudyPage = lazy(() => import('./components/pages/TracerStudyPage'));
 
 // Sign In dan Sign Up juga di-lazy load, tapi bisa di-import langsung jika perlu
 const SignInPage = lazy(() => import('./components/pages/SignInPage'));
@@ -36,6 +37,7 @@ const pageTitleMap = {
   '/lpk': 'LPK',
   '/perusahaan': 'Perusahaan',
   '/jobfair': 'Job Fair',
+  '/tracer-study': 'Tracer Study',
   '/docs': 'Documentation',
 };
 
@@ -89,18 +91,19 @@ function DashboardLayout() {
         <main className="flex-1 overflow-hidden">
           {/* Suspense untuk lazy loading pages */}
           <Suspense fallback={<LoadingFallback />}>
-            <Routes>
-              <Route path="/" element={<DashboardPage />} />
-              <Route path="/pelatihan" element={<PelatihanPage />} />
-              <Route path="/pemagangan" element={<PemaganganPage />} />
-              <Route path="/sertifikasi" element={<SertifikasiPage />} />
-              <Route path="/lpk" element={<LPKPage />} />
-              <Route path="/perusahaan" element={<PerusahaanPage />} />
-              <Route path="/jobfair" element={<JobFairPage />} />
-              <Route path="/docs" element={<DocsPage />} />
-              <Route path="/pelatihan/:id" element={<PelatihanDetailPage />} />
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
+              <Routes>
+                <Route path="/" element={<DashboardPage />} />
+                <Route path="/pelatihan" element={<PelatihanPage />} />
+                <Route path="/pemagangan" element={<PemaganganPage />} />
+                <Route path="/sertifikasi" element={<SertifikasiPage />} />
+                <Route path="/lpk" element={<LPKPage />} />
+                <Route path="/perusahaan" element={<PerusahaanPage />} />
+                <Route path="/jobfair" element={<JobFairPage />} />
+                <Route path="/tracer-study" element={<TracerStudyPage />} />
+                <Route path="/docs" element={<DocsPage />} />
+                <Route path="/pelatihan/:id" element={<PelatihanDetailPage />} />
+                <Route path="*" element={<NotFoundPage />} />
+              </Routes>
           </Suspense>
         </main>
       </div>

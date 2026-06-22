@@ -51,24 +51,16 @@ export function AuthProvider({ children }) {
   /**
    * Login function
    */
-  const login = useCallback(async (username, password) => {
+  const login = useCallback(async (email, password) => {
     try {
       setIsLoading(true);
       setError(null);
 
-      const response = await authAPI.login(username, password);
-      const { accessToken, refreshToken, ...userPayload } = response.data;
-      const user = {
-        id: userPayload.id,
-        username: userPayload.username,
-        email: userPayload.email,
-        firstName: userPayload.firstName,
-        lastName: userPayload.lastName,
-        image: userPayload.image,
-      };
+      const response = await authAPI.login(email, password);
+      const { token, user } = response.data;
 
       // Simpan ke localStorage
-      localStorage.setItem('token', accessToken);
+      localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
 
       // Update state
