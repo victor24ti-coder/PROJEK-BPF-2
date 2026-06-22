@@ -3,11 +3,12 @@ import { useState } from "react";
   import { useAuth } from "../../context/AuthContext";
   import {
     LayoutDashboard, User, Table2, Bell, CreditCard,
-    BookOpen, LogIn, UserPlus, X, Menu, ChevronRight, LogOut, Compass
+    BookOpen, LogIn, UserPlus, X, Menu, ChevronRight, LogOut, Compass, Users, FileText
   } from "lucide-react";
 
   const navItems = [
     { title: "Dashboard", path: "/", icon: LayoutDashboard },
+    { title: "Tenaga Kerja", path: "/tenaga-kerja", icon: Users },
     { title: "Pelatihan", path: "/pelatihan", icon: BookOpen },
     { title: "Pemagangan", path: "/pemagangan", icon: User },
     { title: "Sertifikasi", path: "/sertifikasi", icon: CreditCard },
@@ -15,6 +16,7 @@ import { useState } from "react";
     { title: "Perusahaan", path: "/perusahaan", icon: User },
     { title: "Job Fair", path: "/jobfair", icon: Bell },
     { title: "Tracer Study", path: "/tracer-study", icon: Compass },
+    { title: "Laporan", path: "/laporan", icon: FileText },
   ];
 
   const authItems = [

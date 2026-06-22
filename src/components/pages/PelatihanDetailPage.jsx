@@ -15,6 +15,11 @@ export default function PelatihanDetailPage() {
   const [searchTrainee, setSearchTrainee] = useState("");
   const [addingTrainee, setAddingTrainee] = useState(false);
 
+  // Custom delete state
+  const [deleteId, setDeleteId] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [saving, setSaving] = useState(false);
+
   const fetchDetails = async () => {
     setLoading(true);
     setError(null);
@@ -66,13 +71,23 @@ export default function PelatihanDetailPage() {
   };
 
   // Hapus peserta dari pelatihan
-  const handleRemovePeserta = async (pesertaId, nama) => {
-    if (!confirm(`Keluarkan ${nama} dari program pelatihan ini?`)) return;
+  const handleRemovePeserta = (pesertaId) => {
+    setDeleteId(pesertaId);
+    setShowDeleteModal(true);
+  };
+
+  const confirmRemovePeserta = async () => {
+    if (!deleteId) return;
+    setSaving(true);
     try {
-      await pesertaPelatihanAPI.delete(pesertaId);
+      await pesertaPelatihanAPI.delete(deleteId);
+      setShowDeleteModal(false);
+      setDeleteId(null);
       fetchDetails();
     } catch {
       alert("Gagal mengeluarkan peserta.");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -308,7 +323,7 @@ export default function PelatihanDetailPage() {
                       </td>
                       <td className="px-4 py-2.5 text-center">
                         <button
-                          onClick={() => handleRemovePeserta(p.id, p.tenaga_kerja?.nama)}
+                          onClick={() => handleRemovePeserta(p.id)}
                           className="text-stone-500 hover:text-red-650 transition-colors"
                           title="Hapus dari Pelatihan"
                         >
@@ -386,6 +401,36 @@ export default function PelatihanDetailPage() {
                   Tidak ada data tenaga kerja yang dapat didaftarkan.
                 </p>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 animate-fadeIn">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 p-6">
+            <h3 className="text-lg font-semibold text-stone-800 mb-2">Konfirmasi Keluarkan</h3>
+            <p className="text-sm text-stone-600 mb-4">
+              Apakah Anda yakin ingin mengeluarkan peserta ini dari program pelatihan?
+            </p>
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={confirmRemovePeserta}
+                disabled={saving}
+                className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-700 transition disabled:opacity-50 font-medium"
+              >
+                {saving ? "Mengeluarkan..." : "Ya, Keluarkan"}
+              </button>
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setDeleteId(null);
+                }}
+                className="border border-stone-300 px-4 py-2 rounded-lg text-sm hover:bg-stone-50 transition font-medium text-stone-700"
+              >
+                Batal
+              </button>
             </div>
           </div>
         </div>

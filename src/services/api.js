@@ -111,11 +111,28 @@ export const perusahaanAPI = {
 // ── LPK ──────────────────────────────────────────
 export const lpkAPI = {
   getAll: (paginate = 'true') => API.get(`/lpk?paginate=${paginate}`),
+  getById: (id) => API.get(`/lpk/${id}`),
+  create: (data) => API.post('/lpk', data),
+  update: (id, data) => API.put(`/lpk/${id}`, data),
+  delete: (id) => API.delete(`/lpk/${id}`),
+};
+
+// ── Job Fair ──────────────────────────────────────────
+export const jobFairAPI = {
+  getAll: () => API.get('/job-fair'),
+  getById: (id) => API.get(`/job-fair/${id}`),
+  create: (data) => API.post('/job-fair', data),
+  update: (id, data) => API.put(`/job-fair/${id}`, data),
+  delete: (id) => API.delete(`/job-fair/${id}`),
 };
 
 // ── Tenaga Kerja ──────────────────────────────────────────
 export const tenagaKerjaAPI = {
   getAll: (paginate = 'true', search = '') => API.get(`/tenaga-kerja?paginate=${paginate}&search=${search}`),
+  getById: (id) => API.get(`/tenaga-kerja/${id}`),
+  create: (data) => API.post('/tenaga-kerja', data),
+  update: (id, data) => API.put(`/tenaga-kerja/${id}`, data),
+  delete: (id) => API.delete(`/tenaga-kerja/${id}`),
 };
 
 // ── Peserta Pelatihan ──────────────────────────────────────────

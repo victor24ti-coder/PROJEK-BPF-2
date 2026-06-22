@@ -1,31 +1,28 @@
 import { useEffect, useState } from 'react';
-import { jobFairAPI } from '../../services/api';
+import API from '../../services/api';
 
 const emptyForm = {
-  nama_kegiatan: '',
-  tanggal: '',
-  lokasi: '',
-  deskripsi: '',
+  jenis_laporan: '',
 };
 
-export default function JobFairPage() {
-  const [data, setData]         = useState([]);
-  const [loading, setLoading]   = useState(false);
+export default function LaporanPage() {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [editId, setEditId]     = useState(null);
-  const [form, setForm]         = useState(emptyForm);
-  const [errors, setErrors]     = useState({});
-  const [saving, setSaving]     = useState(false);
+  const [editId, setEditId] = useState(null);
+  const [form, setForm] = useState(emptyForm);
+  const [file, setFile] = useState(null);
+  const [errors, setErrors] = useState({});
+  const [saving, setSaving] = useState(false);
 
   // Custom delete state
   const [deleteId, setDeleteId] = useState(null);
-  const [deleteNama, setDeleteNama] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await jobFairAPI.getAll();
+      const res = await API.get('/laporan');
       setData(res.data.data ?? []);
     } catch {
       setData([]);
@@ -39,15 +36,19 @@ export default function JobFairPage() {
   const openTambah = () => {
     setEditId(null);
     setForm(emptyForm);
+    setFile(null);
     setErrors({});
     setShowModal(true);
   };
 
   const openEdit = async (id) => {
     try {
-      const res = await jobFairAPI.getById(id);
-      setForm(res.data.data);
+      const res = await API.get(`/laporan/${id}`);
+      setForm({
+        jenis_laporan: res.data.data.jenis_laporan,
+      });
       setEditId(id);
+      setFile(null);
       setErrors({});
       setShowModal(true);
     } catch {
@@ -55,9 +56,8 @@ export default function JobFairPage() {
     }
   };
 
-  const handleDelete = (id, nama) => {
+  const handleDelete = (id) => {
     setDeleteId(id);
-    setDeleteNama(nama);
     setShowDeleteModal(true);
   };
 
@@ -65,10 +65,9 @@ export default function JobFairPage() {
     if (!deleteId) return;
     setSaving(true);
     try {
-      await jobFairAPI.delete(deleteId);
+      await API.delete(`/laporan/${deleteId}`);
       setShowDeleteModal(false);
       setDeleteId(null);
-      setDeleteNama('');
       fetchData();
     } catch {
       alert('Gagal menghapus data');
@@ -82,10 +81,21 @@ export default function JobFairPage() {
     setSaving(true);
     setErrors({});
     try {
+      const formData = new FormData();
+      formData.append('jenis_laporan', form.jenis_laporan);
+      if (file) {
+        formData.append('file', file);
+      }
+
       if (editId) {
-        await jobFairAPI.update(editId, form);
+        formData.append('_method', 'PUT');
+        await API.post(`/laporan/${editId}`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
       } else {
-        await jobFairAPI.create(form);
+        await API.post('/laporan', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
       }
       setShowModal(false);
       fetchData();
@@ -105,16 +115,21 @@ export default function JobFairPage() {
     setErrors({ ...errors, [e.target.name]: null });
   };
 
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
+    setErrors({ ...errors, file: null });
+  };
+
   return (
     <div className="h-full overflow-y-auto p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-stone-900">Job Fair</h2>
+        <h2 className="text-2xl font-bold text-stone-900">Laporan Aktivitas</h2>
         <button
           onClick={openTambah}
           className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm"
         >
-          + Tambah Kegiatan
+          + Buat Laporan
         </button>
       </div>
 
@@ -124,10 +139,10 @@ export default function JobFairPage() {
           <thead className="bg-stone-50 text-stone-600 text-left">
             <tr>
               <th className="px-4 py-3">No</th>
-              <th className="px-4 py-3">Nama Kegiatan</th>
-              <th className="px-4 py-3">Tanggal</th>
-              <th className="px-4 py-3">Lokasi</th>
-              <th className="px-4 py-3">Deskripsi</th>
+              <th className="px-4 py-3">Nama Pembuat</th>
+              <th className="px-4 py-3">Jenis Laporan</th>
+              <th className="px-4 py-3">Berkas</th>
+              <th className="px-4 py-3">Format</th>
               <th className="px-4 py-3">Aksi</th>
             </tr>
           </thead>
@@ -148,10 +163,30 @@ export default function JobFairPage() {
               data.map((item, i) => (
                 <tr key={item.id} className="border-t border-stone-100 hover:bg-stone-50 transition">
                   <td className="px-4 py-3 text-stone-400">{i + 1}</td>
-                  <td className="px-4 py-3 font-medium text-stone-800">{item.nama_kegiatan}</td>
-                  <td className="px-4 py-3 text-stone-600">{item.tanggal ?? '-'}</td>
-                  <td className="px-4 py-3 text-stone-600">{item.lokasi ?? '-'}</td>
-                  <td className="px-4 py-3 text-stone-600">{item.deskripsi ?? '-'}</td>
+                  <td className="px-4 py-3 font-medium text-stone-800">
+                    {item.user?.nama ?? `User ID: ${item.user_id}`}
+                  </td>
+                  <td className="px-4 py-3 text-stone-600">{item.jenis_laporan}</td>
+                  <td className="px-4 py-3 text-stone-600">
+                    {item.file ? (
+                      <a
+                        href={`http://127.0.0.1:8000/storage/${item.file}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline inline-flex items-center gap-1 font-medium"
+                      >
+                        Lihat File
+                      </a>
+                    ) : (
+                      <span className="text-stone-400">-</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className={`px-2 py-1 rounded text-xs font-semibold ${item.format_file === 'pdf' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
+                      }`}>
+                      {item.format_file?.toUpperCase() ?? 'N/A'}
+                    </span>
+                  </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-3">
                       <button
@@ -161,7 +196,7 @@ export default function JobFairPage() {
                         Edit
                       </button>
                       <button
-                        onClick={() => handleDelete(item.id, item.nama_kegiatan)}
+                        onClick={() => handleDelete(item.id)}
                         className="text-red-500 hover:underline text-sm"
                       >
                         Hapus
@@ -180,44 +215,39 @@ export default function JobFairPage() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-lg w-full max-w-lg mx-4 p-6">
             <h3 className="text-lg font-semibold text-stone-800 mb-4">
-              {editId ? 'Edit Kegiatan Job Fair' : 'Tambah Kegiatan Job Fair'}
+              {editId ? 'Edit Laporan' : 'Buat Laporan Baru'}
             </h3>
             <form onSubmit={handleSubmit} className="space-y-3">
-              {[
-                { name: 'nama_kegiatan', label: 'Nama Kegiatan', type: 'text' },
-                { name: 'tanggal',       label: 'Tanggal',       type: 'date' },
-                { name: 'lokasi',        label: 'Lokasi',        type: 'text' },
-              ].map(({ name, label, type }) => (
-                <div key={name}>
-                  <label className="block text-sm text-stone-700 mb-1">{label}</label>
-                  <input
-                    type={type}
-                    name={name}
-                    value={form[name]}
-                    onChange={handleChange}
-                    className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 ${
-                      errors[name] ? 'border-red-400' : 'border-stone-300'
+              <div>
+                <label className="block text-sm text-stone-700 mb-1">Jenis Laporan</label>
+                <input
+                  type="text"
+                  name="jenis_laporan"
+                  value={form.jenis_laporan}
+                  onChange={handleChange}
+                  placeholder="Misal: Laporan Pelatihan Semester I"
+                  className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 ${errors.jenis_laporan ? 'border-red-400' : 'border-stone-300'
                     }`}
-                  />
-                  {errors[name] && (
-                    <p className="text-red-500 text-xs mt-1">{errors[name][0]}</p>
-                  )}
-                </div>
-              ))}
+                />
+                {errors.jenis_laporan && (
+                  <p className="text-red-500 text-xs mt-1">{errors.jenis_laporan[0]}</p>
+                )}
+              </div>
 
               <div>
-                <label className="block text-sm text-stone-700 mb-1">Deskripsi</label>
-                <textarea
-                  name="deskripsi"
-                  value={form.deskripsi}
-                  onChange={handleChange}
-                  rows={3}
-                  className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 ${
-                    errors.deskripsi ? 'border-red-400' : 'border-stone-300'
-                  }`}
+                <label className="block text-sm text-stone-700 mb-1">
+                  File Berkas {editId && <span className="text-stone-400 text-xs">(Kosongkan jika tidak ingin mengubah)</span>}
+                </label>
+                <input
+                  type="file"
+                  name="file"
+                  onChange={handleFileChange}
+                  accept=".pdf,.xls,.xlsx"
+                  className={`w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer ${errors.file ? 'border-red-400' : 'border-stone-300'
+                    }`}
                 />
-                {errors.deskripsi && (
-                  <p className="text-red-500 text-xs mt-1">{errors.deskripsi[0]}</p>
+                {errors.file && (
+                  <p className="text-red-500 text-xs mt-1">{errors.file[0]}</p>
                 )}
               </div>
 
@@ -227,7 +257,7 @@ export default function JobFairPage() {
                   disabled={saving}
                   className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm hover:bg-blue-700 transition disabled:opacity-50"
                 >
-                  {saving ? 'Menyimpan...' : editId ? 'Simpan Perubahan' : 'Tambah'}
+                  {saving ? 'Menyimpan...' : editId ? 'Simpan Perubahan' : 'Buat'}
                 </button>
                 <button
                   type="button"
@@ -248,7 +278,7 @@ export default function JobFairPage() {
           <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 p-6">
             <h3 className="text-lg font-semibold text-stone-800 mb-2">Konfirmasi Hapus</h3>
             <p className="text-sm text-stone-600 mb-4">
-              Apakah Anda yakin ingin menghapus kegiatan Job Fair <strong>{deleteNama}</strong>? Tindakan ini tidak dapat dibatalkan.
+              Apakah Anda yakin ingin menghapus data laporan ini? Tindakan ini tidak dapat dibatalkan.
             </p>
             <div className="flex gap-2 justify-end">
               <button
@@ -262,7 +292,6 @@ export default function JobFairPage() {
                 onClick={() => {
                   setShowDeleteModal(false);
                   setDeleteId(null);
-                  setDeleteNama('');
                 }}
                 className="border border-stone-300 px-4 py-2 rounded-lg text-sm hover:bg-stone-50 transition font-medium text-stone-700"
               >

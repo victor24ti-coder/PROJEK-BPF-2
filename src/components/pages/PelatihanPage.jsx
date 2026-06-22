@@ -27,6 +27,11 @@ export default function PelatihanPage() {
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
 
+  // Custom delete state
+  const [deleteId, setDeleteId] = useState(null);
+  const [deleteNama, setDeleteNama] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
   // State untuk ringkasan stats
   const [stats, setStats] = useState({ total: 0, berjalan: 0, selesai: 0, peserta: 0 });
 
@@ -35,7 +40,7 @@ export default function PelatihanPage() {
     setError(null);
     try {
       const res = await pelatihanAPI.getAll();
-      const rawData = res.data.data.data ?? [];
+      const rawData = res.data.data ?? [];
 
       // Filter berdasarkan kata kunci pencarian (lokal agar fleksibel)
       const filtered = rawData.filter((item) =>
@@ -109,13 +114,25 @@ export default function PelatihanPage() {
     setShowModal(true);
   };
 
-  const handleDelete = async (id, nama) => {
-    if (!confirm(`Hapus program pelatihan "${nama}"?`)) return;
+  const handleDelete = (id, nama) => {
+    setDeleteId(id);
+    setDeleteNama(nama);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteId) return;
+    setSaving(true);
     try {
-      await pelatihanAPI.delete(id);
+      await pelatihanAPI.delete(deleteId);
+      setShowDeleteModal(false);
+      setDeleteId(null);
+      setDeleteNama("");
       fetchData(search);
     } catch {
       alert("Gagal menghapus data pelatihan.");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -238,7 +255,7 @@ export default function PelatihanPage() {
           <div>
             <h2 className="text-2xl font-bold text-stone-900">Program Pelatihan Kerja</h2>
             <p className="text-sm text-stone-500 mt-1">
-              Data pendaftaran, penyelenggaraan, dan LPK pelaksana pelatihan di Provinsi Riau.
+              Data pendaftaran, penyelenggaraan, and LPK pelaksana pelatihan di Provinsi Riau.
             </p>
           </div>
 
@@ -551,6 +568,37 @@ export default function PelatihanPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 animate-fadeIn">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 p-6">
+            <h3 className="text-lg font-semibold text-stone-800 mb-2">Konfirmasi Hapus</h3>
+            <p className="text-sm text-stone-600 mb-4">
+              Apakah Anda yakin ingin menghapus program pelatihan <strong>{deleteNama}</strong>? Tindakan ini tidak dapat dibatalkan.
+            </p>
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={confirmDelete}
+                disabled={saving}
+                className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-700 transition disabled:opacity-50 font-medium"
+              >
+                {saving ? "Menghapus..." : "Ya, Hapus"}
+              </button>
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setDeleteId(null);
+                  setDeleteNama("");
+                }}
+                className="border border-stone-300 px-4 py-2 rounded-lg text-sm hover:bg-stone-50 transition font-medium text-stone-700"
+              >
+                Batal
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -21,6 +21,8 @@ const JobFairPage = lazy(() => import('./components/pages/JobFairPage'));
 const DocsPage = lazy(() => import('./components/pages/DocsPage'));
 const PelatihanDetailPage = lazy(() => import('./components/pages/PelatihanDetailPage'));
 const TracerStudyPage = lazy(() => import('./components/pages/TracerStudyPage'));
+const TenagaKerjaPage = lazy(() => import('./components/pages/TenagaKerjaPage'));
+const LaporanPage = lazy(() => import('./components/pages/LaporanPage'));
 
 // Sign In dan Sign Up juga di-lazy load, tapi bisa di-import langsung jika perlu
 const SignInPage = lazy(() => import('./components/pages/SignInPage'));
@@ -38,6 +40,8 @@ const pageTitleMap = {
   '/perusahaan': 'Perusahaan',
   '/jobfair': 'Job Fair',
   '/tracer-study': 'Tracer Study',
+  '/tenaga-kerja': 'Tenaga Kerja',
+  '/laporan': 'Laporan',
   '/docs': 'Documentation',
 };
 
@@ -100,6 +104,8 @@ function DashboardLayout() {
                 <Route path="/perusahaan" element={<PerusahaanPage />} />
                 <Route path="/jobfair" element={<JobFairPage />} />
                 <Route path="/tracer-study" element={<TracerStudyPage />} />
+                <Route path="/tenaga-kerja" element={<TenagaKerjaPage />} />
+                <Route path="/laporan" element={<LaporanPage />} />
                 <Route path="/docs" element={<DocsPage />} />
                 <Route path="/pelatihan/:id" element={<PelatihanDetailPage />} />
                 <Route path="*" element={<NotFoundPage />} />

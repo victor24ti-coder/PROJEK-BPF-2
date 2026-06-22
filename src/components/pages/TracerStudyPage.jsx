@@ -24,6 +24,10 @@ export default function TracerStudyPage() {
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
 
+  // Custom delete state
+  const [deleteId, setDeleteId] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
   // Stats
   const [stats, setStats] = useState({ total: 0, bekerja: 0, wirausaha: 0, mencari: 0 });
 
@@ -32,7 +36,7 @@ export default function TracerStudyPage() {
     setError(null);
     try {
       const res = await tracerStudyAPI.getAll(keyword);
-      const rawData = res.data.data.data ?? [];
+      const rawData = res.data.data ?? [];
       setData(rawData);
 
       // Recalculate stats
@@ -98,13 +102,23 @@ export default function TracerStudyPage() {
     setShowModal(true);
   };
 
-  const handleDelete = async (id, nama) => {
-    if (!confirm(`Hapus data Tracer Study untuk "${nama}"?`)) return;
+  const handleDelete = (id) => {
+    setDeleteId(id);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteId) return;
+    setSaving(true);
     try {
-      await tracerStudyAPI.delete(id);
+      await tracerStudyAPI.delete(deleteId);
+      setShowDeleteModal(false);
+      setDeleteId(null);
       fetchData(search);
     } catch {
       alert("Gagal menghapus data.");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -492,6 +506,36 @@ export default function TracerStudyPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 animate-fadeIn">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 p-6">
+            <h3 className="text-lg font-semibold text-stone-800 mb-2">Konfirmasi Hapus</h3>
+            <p className="text-sm text-stone-600 mb-4">
+              Apakah Anda yakin ingin menghapus data Tracer Study ini? Tindakan ini tidak dapat dibatalkan.
+            </p>
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={confirmDelete}
+                disabled={saving}
+                className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-700 transition disabled:opacity-50 font-medium"
+              >
+                {saving ? "Menghapus..." : "Ya, Hapus"}
+              </button>
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setDeleteId(null);
+                }}
+                className="border border-stone-300 px-4 py-2 rounded-lg text-sm hover:bg-stone-50 transition font-medium text-stone-700"
+              >
+                Batal
+              </button>
+            </div>
           </div>
         </div>
       )}
