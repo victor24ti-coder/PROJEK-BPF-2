@@ -168,9 +168,9 @@ export default function LaporanPage() {
                   </td>
                   <td className="px-4 py-3 text-stone-600">{item.jenis_laporan}</td>
                   <td className="px-4 py-3 text-stone-600">
-                    {item.file ? (
+                    {item.format_file ? (
                       <a
-                        href={`http://127.0.0.1:8000/storage/${item.file}`}
+                        href={`http://127.0.0.1:8000/storage/${item.format_file}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-600 hover:underline inline-flex items-center gap-1 font-medium"
@@ -182,9 +182,9 @@ export default function LaporanPage() {
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`px-2 py-1 rounded text-xs font-semibold ${item.format_file === 'pdf' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
+                    <span className={`px-2 py-1 rounded text-xs font-semibold ${item.format_file?.endsWith('pdf') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
                       }`}>
-                      {item.format_file?.toUpperCase() ?? 'N/A'}
+                      {item.format_file ? item.format_file.split('.').pop().toUpperCase() : 'N/A'}
                     </span>
                   </td>
                   <td className="px-4 py-3">

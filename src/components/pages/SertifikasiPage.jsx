@@ -1,18 +1,19 @@
 import { useEffect, useState } from 'react';
-import API, { sertifikasiAPI, tenagaKerjaAPI } from '../../services/api';
+import API, { sertifikasiAPI, pesertaPelatihanAPI } from '../../services/api';
 
 const emptyForm = {
-  tenaga_kerja_id: '',
+  peserta_pelatihan_id: '',
   nama_sertifikasi: '',
   lembaga_sertifikasi: '',
   nomor_sertifikat: '',
   tanggal_terbit: '',
   masa_berlaku: '',
+  status_sertifikat: 'aktif',
 };
 
 export default function SertifikasiPage() {
   const [data, setData]                 = useState([]);
-  const [trainees, setTrainees]         = useState([]);
+  const [pesertas, setPesertas]         = useState([]);
   const [loading, setLoading]           = useState(false);
   const [showModal, setShowModal]         = useState(false);
   const [editId, setEditId]             = useState(null);
@@ -28,8 +29,8 @@ export default function SertifikasiPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await sertifikasiAPI.getAll();
-      setData(res.data.data ?? []);
+      const res = await sertifikasiAPI.getAll('paginate=false');
+      setData(res.data.data?.data ?? res.data.data ?? []);
     } catch {
       setData([]);
     } finally {
@@ -37,18 +38,19 @@ export default function SertifikasiPage() {
     }
   };
 
-  const loadTrainees = async () => {
+  const loadPesertas = async () => {
     try {
-      const tkRes = await tenagaKerjaAPI.getAll('false');
-      setTrainees(tkRes.data.data ?? []);
+      const pRes = await pesertaPelatihanAPI.getAll('paginate=false');
+      const payload = pRes.data.data;
+      setPesertas(Array.isArray(payload) ? payload : (payload?.data ?? []));
     } catch (e) {
-      console.error('Failed to load trainees options', e);
+      console.error('Failed to load participants options', e);
     }
   };
 
   useEffect(() => {
     fetchData();
-    loadTrainees();
+    loadPesertas();
   }, []);
 
   const openTambah = () => {
@@ -63,12 +65,13 @@ export default function SertifikasiPage() {
     try {
       const res = await sertifikasiAPI.getById(id);
       setForm({
-        tenaga_kerja_id: res.data.data.tenaga_kerja_id ?? '',
+        peserta_pelatihan_id: res.data.data.peserta_pelatihan_id ?? '',
         nama_sertifikasi: res.data.data.nama_sertifikasi ?? '',
         lembaga_sertifikasi: res.data.data.lembaga_sertifikasi ?? '',
         nomor_sertifikat: res.data.data.nomor_sertifikat ?? '',
         tanggal_terbit: res.data.data.tanggal_terbit ?? '',
         masa_berlaku: res.data.data.masa_berlaku ?? '',
+        status_sertifikat: res.data.data.status_sertifikat ?? 'aktif',
       });
       setEditId(id);
       setFile(null);
@@ -110,7 +113,7 @@ export default function SertifikasiPage() {
       });
 
       if (file) {
-        formData.append('foto', file);
+        formData.append('file_sertifikat', file);
       }
 
       if (editId) {
@@ -143,7 +146,7 @@ export default function SertifikasiPage() {
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
-    setErrors({ ...errors, foto: null });
+    setErrors({ ...errors, file_sertifikat: null });
   };
 
   return (
@@ -165,7 +168,7 @@ export default function SertifikasiPage() {
           <thead className="bg-stone-50 text-stone-600 text-left">
             <tr>
               <th className="px-4 py-3">No</th>
-              <th className="px-4 py-3">Foto</th>
+              <th className="px-4 py-3">Sertifikat</th>
               <th className="px-4 py-3">Nama Tenaga Kerja</th>
               <th className="px-4 py-3">Nama Sertifikasi</th>
               <th className="px-4 py-3">Lembaga Sertifikasi</th>
@@ -192,26 +195,21 @@ export default function SertifikasiPage() {
                 <tr key={item.id} className="border-t border-stone-100 hover:bg-stone-50 transition">
                   <td className="px-4 py-3 text-stone-400">{i + 1}</td>
                   <td className="px-4 py-3">
-                    {item.foto ? (
+                    {item.file_sertifikat ? (
                       <a
-                        href={`http://127.0.0.1:8000/storage/${item.foto}`}
+                        href={`http://127.0.0.1:8000/storage/${item.file_sertifikat}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-block"
+                        className="text-blue-600 hover:underline flex items-center gap-1 text-sm font-medium"
                       >
-                        <img
-                          src={`http://127.0.0.1:8000/storage/${item.foto}`}
-                          alt={item.nama_sertifikasi}
-                          className="w-10 h-10 object-cover rounded border border-stone-200 hover:scale-105 transition"
-                          onError={(e) => { e.target.src = 'https://placehold.co/100x100?text=Foto'; }}
-                        />
+                        PDF
                       </a>
                     ) : (
                       <span className="text-stone-400">-</span>
                     )}
                   </td>
                   <td className="px-4 py-3 font-medium text-stone-800">
-                    {item.tenaga_kerja?.nama ?? `ID: ${item.tenaga_kerja_id}`}
+                    {item.peserta_pelatihan?.tenaga_kerja?.nama ?? `ID: ${item.peserta_pelatihan_id}`}
                   </td>
                   <td className="px-4 py-3 text-stone-600">{item.nama_sertifikasi}</td>
                   <td className="px-4 py-3 text-stone-600">{item.lembaga_sertifikasi}</td>
@@ -249,22 +247,24 @@ export default function SertifikasiPage() {
             </h3>
             <form onSubmit={handleSubmit} className="space-y-3">
               <div>
-                <label className="block text-sm text-stone-700 mb-1">Tenaga Kerja</label>
+                <label className="block text-sm text-stone-700 mb-1">Peserta Pelatihan</label>
                 <select
-                  name="tenaga_kerja_id"
-                  value={form.tenaga_kerja_id}
+                  name="peserta_pelatihan_id"
+                  value={form.peserta_pelatihan_id}
                   onChange={handleChange}
                   className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white ${
-                    errors.tenaga_kerja_id ? 'border-red-400' : 'border-stone-300'
+                    errors.peserta_pelatihan_id ? 'border-red-400' : 'border-stone-300'
                   }`}
                 >
-                  <option value="">Pilih Tenaga Kerja</option>
-                  {trainees.map(t => (
-                    <option key={t.id} value={t.id}>{t.nama} (NIK: {t.nik})</option>
+                  <option value="">Pilih Peserta Pelatihan</option>
+                  {pesertas.map(p => (
+                    <option key={p.id} value={p.id}>
+                      {p.tenaga_kerja?.nama ?? '—'} — {p.pelatihan?.nama_pelatihan ?? '—'}
+                    </option>
                   ))}
                 </select>
-                {errors.tenaga_kerja_id && (
-                  <p className="text-red-500 text-xs mt-1">{errors.tenaga_kerja_id[0]}</p>
+                {errors.peserta_pelatihan_id && (
+                  <p className="text-red-500 text-xs mt-1">{errors.peserta_pelatihan_id[0]}</p>
                 )}
               </div>
 
@@ -293,20 +293,38 @@ export default function SertifikasiPage() {
               ))}
 
               <div>
+                <label className="block text-sm text-stone-700 mb-1">Status Sertifikat</label>
+                <select
+                  name="status_sertifikat"
+                  value={form.status_sertifikat}
+                  onChange={handleChange}
+                  className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white ${
+                    errors.status_sertifikat ? 'border-red-400' : 'border-stone-300'
+                  }`}
+                >
+                  <option value="aktif">Aktif</option>
+                  <option value="tidak_aktif">Tidak Aktif</option>
+                </select>
+                {errors.status_sertifikat && (
+                  <p className="text-red-500 text-xs mt-1">{errors.status_sertifikat[0]}</p>
+                )}
+              </div>
+
+              <div>
                 <label className="block text-sm text-stone-700 mb-1">
-                  Foto Sertifikat {editId && <span className="text-stone-400 text-xs">(Kosongkan jika tidak ingin mengubah)</span>}
+                  Berkas Sertifikat (PDF) {editId && <span className="text-stone-400 text-xs">(Kosongkan jika tidak ingin mengubah)</span>}
                 </label>
                 <input
                   type="file"
-                  name="foto"
+                  name="file_sertifikat"
                   onChange={handleFileChange}
-                  accept="image/*"
+                  accept=".pdf"
                   className={`w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer ${
-                    errors.foto ? 'border-red-400' : 'border-stone-300'
+                    errors.file_sertifikat ? 'border-red-400' : 'border-stone-300'
                   }`}
                 />
-                {errors.foto && (
-                  <p className="text-red-500 text-xs mt-1">{errors.foto[0]}</p>
+                {errors.file_sertifikat && (
+                  <p className="text-red-500 text-xs mt-1">{errors.file_sertifikat[0]}</p>
                 )}
               </div>
 

@@ -9,7 +9,7 @@ import axios from 'axios';
 
 // Membuat instance axios dengan konfigurasi default
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -38,8 +38,11 @@ API.interceptors.request.use(
 API.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Jika token expired (dan bukan request login), redirect ke login
-    if (error.response?.status === 401 && !error.config?.url?.endsWith('/login')) {
+    // Jika token expired (dan bukan request login/register), redirect ke login
+    const requestUrl = error.config?.url || '';
+    const isAuthRequest = requestUrl.includes('/login') || requestUrl.includes('/register');
+    
+    if (error.response?.status === 401 && !isAuthRequest) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/sign-in';
@@ -56,7 +59,7 @@ export const authAPI = {
     return API.post('/login', { email, password });
   },
   signup: (userData) => {
-    return API.post('/auth/signup', userData);
+    return API.post('/register', userData);
   },
   logout: () => {
     return API.post('/logout');
@@ -70,18 +73,18 @@ export const authAPI = {
  * Pelatihan API Endpoints
  */
 export const pelatihanAPI = {
-  getAll: () => API.get('/pelatihan'),
-  getById: (id) => API.get(`/pelatihan/${id}`),
-  create: (data) => API.post('/pelatihan', data),
-  update: (id, data) => API.put(`/pelatihan/${id}`, data),
-  delete: (id) => API.delete(`/pelatihan/${id}`),
+  getAll: () => API.get('/lpk/pelatihan'),
+  getById: (id) => API.get(`/lpk/pelatihan/${id}`),
+  create: (data) => API.post('/lpk/pelatihan', data),
+  update: (id, data) => API.put(`/lpk/pelatihan/${id}`, data),
+  delete: (id) => API.delete(`/lpk/pelatihan/${id}`),
 };
 
 /**
  * Pemagangan API Endpoints
  */
 export const pemaganganAPI = {
-  getAll: () => API.get('/pemagangan'),
+  getAll: (params = '') => API.get(`/pemagangan?${params}`),
   getById: (id) => API.get(`/pemagangan/${id}`),
   create: (data) => API.post('/pemagangan', data),
   update: (id, data) => API.put(`/pemagangan/${id}`, data),
@@ -92,11 +95,16 @@ export const pemaganganAPI = {
  * Sertifikasi API Endpoints
  */
 export const sertifikasiAPI = {
-  getAll: () => API.get('/sertifikasi'),
+  getAll: (params = '') => API.get(`/sertifikasi?${params}`),
   getById: (id) => API.get(`/sertifikasi/${id}`),
-  create: (data) => API.post('/sertifikasi', data),
-  update: (id, data) => API.put(`/sertifikasi/${id}`, data),
+  create: (formData) => API.post('/sertifikasi', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  update: (id, formData) => API.post(`/sertifikasi/${id}?_method=PUT`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
   delete: (id) => API.delete(`/sertifikasi/${id}`),
+  download: (id) => API.get(`/sertifikasi/${id}/download`, { responseType: 'blob' }),
 };
 
 // ── Perusahaan Mitra ──────────────────────────────────────────
@@ -119,7 +127,7 @@ export const lpkAPI = {
 
 // ── Job Fair ──────────────────────────────────────────
 export const jobFairAPI = {
-  getAll: () => API.get('/job-fair'),
+  getAll: (params = '') => API.get(`/job-fair?${params}`),
   getById: (id) => API.get(`/job-fair/${id}`),
   create: (data) => API.post('/job-fair', data),
   update: (id, data) => API.put(`/job-fair/${id}`, data),
@@ -137,9 +145,24 @@ export const tenagaKerjaAPI = {
 
 // ── Peserta Pelatihan ──────────────────────────────────────────
 export const pesertaPelatihanAPI = {
-  create: (data)        => API.post('/peserta-pelatihan', data),
-  update: (id, data)    => API.put(`/peserta-pelatihan/${id}`, data),
-  delete: (id)          => API.delete(`/peserta-pelatihan/${id}`),
+  getAll: (params = '') => API.get(`/peserta-pelatihan?${params}`),
+  getById: (id) => API.get(`/peserta-pelatihan/${id}`),
+  create: (formData) => API.post('/peserta-pelatihan', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  // PUT multipart tidak bisa, gunakan POST + _method=PUT
+  update: (id, formData) => API.post(`/peserta-pelatihan/${id}?_method=PUT`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  delete: (id) => API.delete(`/peserta-pelatihan/${id}`),
+  importPreview: (data) => API.post('/peserta-pelatihan/import-preview', data),
+  importCommit: (data) => API.post('/peserta-pelatihan/import-commit', data),
+  getImportHistory: (params = '') => API.get(`/peserta-pelatihan/import-history?${params}`),
+};
+
+// ── Laporan ──────────────────────────────────────────
+export const laporanAPI = {
+  getDashboard: (params = '') => API.get(`/laporan/dashboard?${params}`),
 };
 
 // ── Tracer Study ──────────────────────────────────────────
@@ -149,6 +172,15 @@ export const tracerStudyAPI = {
   create:  (data)        => API.post('/tracer-study', data),
   update:  (id, data)    => API.put(`/tracer-study/${id}`, data),
   delete:  (id)          => API.delete(`/tracer-study/${id}`),
+};
+
+// ── Users Management ──────────────────────────────────────────
+export const usersAPI = {
+  getAll: () => API.get('/users'),
+  getById: (id) => API.get(`/users/${id}`),
+  create: (data) => API.post('/users', data),
+  update: (id, data) => API.put(`/users/${id}`, data),
+  delete: (id) => API.delete(`/users/${id}`),
 };
 
 export default API;

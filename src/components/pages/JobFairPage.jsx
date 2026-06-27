@@ -25,8 +25,9 @@ export default function JobFairPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await jobFairAPI.getAll();
-      setData(res.data.data ?? []);
+      const res = await jobFairAPI.getAll('paginate=false');
+      const raw = res.data.data;
+      setData(Array.isArray(raw) ? raw : (raw?.data ?? []));
     } catch {
       setData([]);
     } finally {
@@ -46,7 +47,7 @@ export default function JobFairPage() {
   const openEdit = async (id) => {
     try {
       const res = await jobFairAPI.getById(id);
-      setForm(res.data.data);
+      setForm({ ...emptyForm, ...res.data.data });
       setEditId(id);
       setErrors({});
       setShowModal(true);
@@ -209,7 +210,7 @@ export default function JobFairPage() {
                 <label className="block text-sm text-stone-700 mb-1">Deskripsi</label>
                 <textarea
                   name="deskripsi"
-                  value={form.deskripsi}
+                  value={form.deskripsi || ''}
                   onChange={handleChange}
                   rows={3}
                   className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 ${

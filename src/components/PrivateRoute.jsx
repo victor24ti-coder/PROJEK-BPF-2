@@ -2,16 +2,26 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 /**
- * PrivateRoute - Komponen untuk melindungi route yang memerlukan autentikasi
- * 
- * Fitur:
- * - Cek apakah user sudah authenticated
- * - Redirect ke /sign-in jika belum login
- * - Loading state saat cek autentikasi
+ * Dapatkan path home berdasarkan role user
  */
+function getHomeByRole(user) {
+  switch (user?.role) {
+    case 'admin':        return '/';
+    case 'staf':         return '/staf/dashboard';
+    case 'lpk':          return '/lpk/dashboard';
+    case 'pencari_kerja': return '/jpk/dashboard';
+    default:             return '/';
+  }
+}
 
-export function PrivateRoute({ children }) {
-  const { isAuthenticated, isLoading } = useAuth();
+/**
+ * PrivateRoute - Komponen untuk melindungi route yang memerlukan autentikasi
+ * @param {Object} props
+ * @param {ReactNode} props.children
+ * @param {string[]} [props.allowedRoles] - Role yang diizinkan akses route ini
+ */
+export function PrivateRoute({ children, allowedRoles }) {
+  const { isAuthenticated, isLoading, user } = useAuth();
 
   // Jika masih loading, tampilkan loading screen
   if (isLoading) {
@@ -30,16 +40,20 @@ export function PrivateRoute({ children }) {
     return <Navigate to="/sign-in" replace />;
   }
 
-  // Render children jika authenticated
+  // Jika ada role restriction dan user tidak punya role yang diizinkan
+  if (allowedRoles && !allowedRoles.includes(user?.role)) {
+    return <Navigate to={getHomeByRole(user)} replace />;
+  }
+
+  // Render children jika authenticated (dan role sesuai jika ada restriction)
   return children;
 }
 
 /**
- * PublicRoute - Komponen untuk route publik (sign-in, sign-up)
- * Redirect ke dashboard jika sudah login
+ * PublicRoute - Redirect ke dashboard sesuai role jika sudah login
  */
 export function PublicRoute({ children }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
 
   if (isLoading) {
     return (
@@ -52,11 +66,12 @@ export function PublicRoute({ children }) {
     );
   }
 
-  // Jika sudah authenticated, redirect ke dashboard
+  // Jika sudah authenticated, redirect ke dashboard sesuai role
   if (isAuthenticated) {
-    return <Navigate to="/" replace />;
+    return <Navigate to={getHomeByRole(user)} replace />;
   }
 
   // Render children jika belum authenticated
   return children;
 }
+

@@ -4,7 +4,29 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { PrivateRoute, PublicRoute } from './components/PrivateRoute';
 import { AuthLayout } from './components/layout/AuthLayout';
 import { Sidebar, TopBar, MobileOverlay } from './components/layout/Sidebar';
+import StafLayout from './components/layout/StafLayout';
+import LpkLayout from './components/layout/LpkLayout';
 import LoadingFallback from './components/LoadingFallback';
+import Pelatihan from "./components/pages/lpk/Pelatihan/Index";
+import PesertaPelatihan from "./components/pages/lpk/PesertaPelatihan/Index";
+import Sertifikasi from "./components/pages/lpk/Sertifikasi/Index";
+import Laporan from "./components/pages/lpk/Laporan/Index";
+import Dashboard from "./components/pages/lpk/Dashboard";
+import Profile from "./components/pages/lpk/Profile";
+import PelatihanCreate from "./components/pages/lpk/Pelatihan/Create";
+import PelatihanEdit from "./components/pages/lpk/Pelatihan/Edit";
+import PelatihanDetail from "./components/pages/lpk/Pelatihan/Detail";
+import PesertaCreate from "./components/pages/lpk/PesertaPelatihan/Create";
+import PesertaEdit from "./components/pages/lpk/PesertaPelatihan/Edit";
+import PesertaDetail from "./components/pages/lpk/PesertaPelatihan/Detail";
+import SertifikasiCreate from "./components/pages/lpk/Sertifikasi/Create";
+import SertifikasiEdit from "./components/pages/lpk/Sertifikasi/Edit";
+import SertifikasiDetail from "./components/pages/lpk/Sertifikasi/Detail";
+// Staf pages
+import StafDashboard from "./components/pages/staf/DashboardPage";
+import StafPelatihan from "./components/pages/staf/PelatihanPage";
+import StafProfile from "./components/pages/staf/ProfilePage";
+
 
 /**
  * Lazy Load Components - Untuk code splitting dan performance optimization
@@ -23,6 +45,8 @@ const PelatihanDetailPage = lazy(() => import('./components/pages/PelatihanDetai
 const TracerStudyPage = lazy(() => import('./components/pages/TracerStudyPage'));
 const TenagaKerjaPage = lazy(() => import('./components/pages/TenagaKerjaPage'));
 const LaporanPage = lazy(() => import('./components/pages/LaporanPage'));
+const UsersPage = lazy(() => import('./components/pages/UsersPage'));
+
 
 // Sign In dan Sign Up juga di-lazy load, tapi bisa di-import langsung jika perlu
 const SignInPage = lazy(() => import('./components/pages/SignInPage'));
@@ -33,10 +57,11 @@ const SignUpPage = lazy(() => import('./components/pages/SignUpPage'));
  */
 const pageTitleMap = {
   '/': 'Dashboard',
+  '/users': 'Manajemen Pengguna',
   '/pelatihan': 'Pelatihan',
   '/pemagangan': 'Pemagangan',
   '/sertifikasi': 'Sertifikasi',
-  '/lpk': 'LPK',
+  '/lpk-data': 'LPK',
   '/perusahaan': 'Perusahaan',
   '/jobfair': 'Job Fair',
   '/tracer-study': 'Tracer Study',
@@ -89,18 +114,19 @@ function DashboardLayout() {
       <MobileOverlay isOpen={mobileMenuOpen} onClose={handleMobileMenuClose} />
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
         <TopBar title={pageTitle} onMenuOpen={() => setMobileMenuOpen(true)} />
 
-        <main className="flex-1 overflow-hidden">
+        <main className="flex-1 overflow-y-auto p-6">
           {/* Suspense untuk lazy loading pages */}
           <Suspense fallback={<LoadingFallback />}>
               <Routes>
                 <Route path="/" element={<DashboardPage />} />
+                <Route path="/users" element={<UsersPage />} />
                 <Route path="/pelatihan" element={<PelatihanPage />} />
                 <Route path="/pemagangan" element={<PemaganganPage />} />
                 <Route path="/sertifikasi" element={<SertifikasiPage />} />
-                <Route path="/lpk" element={<LPKPage />} />
+                <Route path="/lpk-data" element={<LPKPage />} />
                 <Route path="/perusahaan" element={<PerusahaanPage />} />
                 <Route path="/jobfair" element={<JobFairPage />} />
                 <Route path="/tracer-study" element={<TracerStudyPage />} />
@@ -157,15 +183,65 @@ function AppRoutes() {
         }
       />
 
-      {/* Private Routes - Dashboard Layout dengan nested routes */}
+      {/* Private Routes - LPK Layout */}
+      <Route
+        path="/lpk/*"
+        element={
+          <PrivateRoute allowedRoles={['lpk']}>
+            <LpkLayout />
+          </PrivateRoute>
+        }
+      >
+        <Route index element={<Navigate to="/lpk/dashboard" replace />} />
+        <Route path="dashboard"                    element={<Dashboard />} />
+        <Route path="profile"                      element={<Profile />} />
+        <Route path="pelatihan"                    element={<Pelatihan />} />
+        <Route path="pelatihan/create"             element={<PelatihanCreate />} />
+        <Route path="pelatihan/edit/:id"           element={<PelatihanEdit />} />
+        <Route path="pelatihan/detail/:id"         element={<PelatihanDetail />} />
+        <Route path="peserta-pelatihan"            element={<PesertaPelatihan />} />
+        <Route path="peserta-pelatihan/create"     element={<PesertaCreate />} />
+        <Route path="peserta-pelatihan/edit/:id"   element={<PesertaEdit />} />
+        <Route path="peserta-pelatihan/detail/:id" element={<PesertaDetail />} />
+        <Route path="sertifikasi"                  element={<Sertifikasi />} />
+        <Route path="sertifikasi/create"           element={<SertifikasiCreate />} />
+        <Route path="sertifikasi/edit/:id"         element={<SertifikasiEdit />} />
+        <Route path="sertifikasi/detail/:id"       element={<SertifikasiDetail />} />
+        <Route path="laporan"                      element={<Laporan />} />
+      </Route>
+
+      {/* Private Routes - Staf Layout */}
+      <Route
+        path="/staf/*"
+        element={
+          <PrivateRoute allowedRoles={['staf']}>
+            <StafLayout />
+          </PrivateRoute>
+        }
+      >
+        <Route index element={<Navigate to="/staf/dashboard" replace />} />
+        <Route path="dashboard"         element={<Suspense fallback={<LoadingFallback />}><StafDashboard /></Suspense>} />
+        <Route path="tenaga-kerja"       element={<Suspense fallback={<LoadingFallback />}><TenagaKerjaPage /></Suspense>} />
+        <Route path="pelatihan"          element={<Suspense fallback={<LoadingFallback />}><StafPelatihan /></Suspense>} />
+        <Route path="peserta-pelatihan"  element={<Suspense fallback={<LoadingFallback />}><PemaganganPage /></Suspense>} />
+        <Route path="sertifikasi"        element={<Suspense fallback={<LoadingFallback />}><SertifikasiPage /></Suspense>} />
+        <Route path="perusahaan"         element={<Suspense fallback={<LoadingFallback />}><PerusahaanPage /></Suspense>} />
+        <Route path="job-fair"           element={<Suspense fallback={<LoadingFallback />}><JobFairPage /></Suspense>} />
+        <Route path="tracer-study"       element={<Suspense fallback={<LoadingFallback />}><TracerStudyPage /></Suspense>} />
+        <Route path="laporan"            element={<Suspense fallback={<LoadingFallback />}><LaporanPage /></Suspense>} />
+        <Route path="profil"             element={<Suspense fallback={<LoadingFallback />}><StafProfile /></Suspense>} />
+      </Route>
+
+      {/* Private Routes - Dashboard Layout (Admin) */}
       <Route
         path="/*"
         element={
-          <PrivateRoute>
+          <PrivateRoute allowedRoles={['admin']}>
             <DashboardLayout />
           </PrivateRoute>
         }
       />
+
     </Routes>
   );
 }

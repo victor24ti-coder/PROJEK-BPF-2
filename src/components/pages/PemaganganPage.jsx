@@ -29,8 +29,8 @@ export default function PemaganganPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await pemaganganAPI.getAll();
-      setData(res.data.data ?? []);
+      const res = await pemaganganAPI.getAll('paginate=false');
+      setData(res.data.data?.data ?? res.data.data ?? []);
     } catch {
       setData([]);
     } finally {

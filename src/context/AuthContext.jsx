@@ -53,7 +53,6 @@ export function AuthProvider({ children }) {
    */
   const login = useCallback(async (email, password) => {
     try {
-      setIsLoading(true);
       setError(null);
 
       const response = await authAPI.login(email, password);
@@ -69,12 +68,29 @@ export function AuthProvider({ children }) {
 
       return { success: true, user };
     } catch (err) {
-      const errorMessage = err.response?.data?.message || 'Login failed. Please try again.';
+      console.error('Login error:', err);
+      
+      let errorMessage = 'Login gagal. Silakan coba lagi.';
+      
+      if (err.response?.data) {
+        // Pesan error dari backend (misal: "Email atau password salah")
+        if (err.response.data.message) {
+          errorMessage = err.response.data.message;
+        }
+        // Laravel validation errors (misal: { errors: { email: ["..."] } })
+        if (err.response.data.errors) {
+          const firstError = Object.values(err.response.data.errors)[0];
+          if (Array.isArray(firstError) && firstError.length > 0) {
+            errorMessage = firstError[0];
+          }
+        }
+      } else if (err.code === 'ERR_NETWORK') {
+        errorMessage = 'Tidak dapat terhubung ke server. Periksa koneksi Anda.';
+      }
+      
       setError(errorMessage);
       setIsAuthenticated(false);
       return { success: false, error: errorMessage };
-    } finally {
-      setIsLoading(false);
     }
   }, []);
 
@@ -83,7 +99,6 @@ export function AuthProvider({ children }) {
    */
   const signup = useCallback(async (userData) => {
     try {
-      setIsLoading(true);
       setError(null);
 
       const response = await authAPI.signup(userData);
@@ -99,12 +114,10 @@ export function AuthProvider({ children }) {
 
       return { success: true, user };
     } catch (err) {
-      const errorMessage = err.response?.data?.message || 'Signup failed. Please try again.';
+      const errorMessage = err.response?.data?.message || 'Signup gagal. Silakan coba lagi.';
       setError(errorMessage);
       setIsAuthenticated(false);
       return { success: false, error: errorMessage };
-    } finally {
-      setIsLoading(false);
     }
   }, []);
 
