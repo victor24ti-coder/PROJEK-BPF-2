@@ -36,7 +36,11 @@ export default function TracerStudyPage() {
     setError(null);
     try {
       const res = await tracerStudyAPI.getAll(keyword);
-      const rawData = res.data.data ?? [];
+      // Backend pakai paginate(10): struktur = { success, data: { data: [...], total, ... } }
+      const paginatorOrArray = res.data.data ?? [];
+      const rawData = Array.isArray(paginatorOrArray)
+        ? paginatorOrArray
+        : (paginatorOrArray.data ?? []);
       setData(rawData);
 
       // Recalculate stats
@@ -46,7 +50,8 @@ export default function TracerStudyPage() {
       const mencari = rawData.filter((item) => item.status_alumni === "belum_bekerja").length;
       setStats({ total, bekerja, wirausaha, mencari });
     } catch (err) {
-      setError("Gagal memuat data penelusuran alumni (Tracer Study).");
+      console.error(err);
+      setError("Gagal memuat data penelusuran alumni (Tracer Study). " + err.message);
       setData([]);
     } finally {
       setLoading(false);

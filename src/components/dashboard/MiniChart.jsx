@@ -19,7 +19,7 @@ export function MiniChart({ data, labels, activeColor = "#1E88E5" }) {
   return (
     <div className="mt-4">
       <div className="h-24 mb-2">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
           <BarChart data={chartData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
             <XAxis dataKey="label" axisLine={false} tickLine={false} tick={false} />
             <Tooltip

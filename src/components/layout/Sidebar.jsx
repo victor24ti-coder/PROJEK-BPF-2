@@ -3,28 +3,58 @@ import { useState } from "react";
   import { useAuth } from "../../context/AuthContext";
   import {
     LayoutDashboard, User, Table2, Bell, CreditCard,
-    BookOpen, LogIn, UserPlus, X, Menu, ChevronRight, LogOut, Compass, Users, FileText
+    BookOpen, LogIn, UserPlus, X, Menu, ChevronRight, LogOut, Compass, Users, FileText, Building2, UserCog
   } from "lucide-react";
 
-  const navItems = [
-    { title: "Dashboard", path: "/", icon: LayoutDashboard },
-    { title: "Tenaga Kerja", path: "/tenaga-kerja", icon: Users },
-    { title: "Pelatihan", path: "/pelatihan", icon: BookOpen },
-    { title: "Pemagangan", path: "/pemagangan", icon: User },
-    { title: "Sertifikasi", path: "/sertifikasi", icon: CreditCard },
-    { title: "LPK", path: "/lpk", icon: Table2 },
-    { title: "Perusahaan", path: "/perusahaan", icon: User },
-    { title: "Job Fair", path: "/jobfair", icon: Bell },
-    { title: "Tracer Study", path: "/tracer-study", icon: Compass },
-    { title: "Laporan", path: "/laporan", icon: FileText },
-  ];
 
+const adminNavItems = [
+  { title: "Dashboard", path: "/", icon: LayoutDashboard },
+  { title: "Manajemen User", path: "/users", icon: UserCog },
+  { title: "Tenaga Kerja", path: "/tenaga-kerja", icon: Users },
+  { title: "Pelatihan", path: "/pelatihan", icon: BookOpen },
+  { title: "Pemagangan", path: "/pemagangan", icon: User },
+  { title: "Sertifikasi", path: "/sertifikasi", icon: CreditCard },
+  { title: "LPK", path: "/lpk-data", icon: Table2 },
+  { title: "Perusahaan", path: "/perusahaan", icon: Building2 },
+  { title: "Job Fair", path: "/jobfair", icon: Bell },
+  { title: "Tracer Study", path: "/tracer-study", icon: Compass },
+  { title: "Laporan", path: "/laporan", icon: FileText },
+];
+
+const lpkNavItems = [
+  { title: "Dashboard", path: "/lpk/dashboard", icon: LayoutDashboard },
+  { title: "Profil LPK", path: "/lpk/profile", icon: Building2 },
+  { title: "Pelatihan", path: "/lpk/pelatihan", icon: BookOpen },
+  { title: "Peserta Pelatihan", path: "/lpk/peserta-pelatihan", icon: Users },
+  { title: "Sertifikasi", path: "/lpk/sertifikasi", icon: CreditCard },
+  { title: "Laporan", path: "/lpk/laporan", icon: FileText },
+];
+
+const stafNavItems = [
+  { title: "Dashboard",           path: "/staf/dashboard",          icon: LayoutDashboard },
+  { title: "Tenaga Kerja",        path: "/staf/tenaga-kerja",       icon: Users },
+  { title: "Pelatihan",           path: "/staf/pelatihan",          icon: BookOpen },
+  { title: "Peserta Pelatihan",   path: "/staf/peserta-pelatihan",  icon: User },
+  { title: "Sertifikasi",         path: "/staf/sertifikasi",        icon: CreditCard },
+  { title: "Perusahaan Mitra",    path: "/staf/perusahaan",         icon: Building2 },
+  { title: "Job Fair",            path: "/staf/job-fair",           icon: Bell },
+  { title: "Tracer Study",        path: "/staf/tracer-study",       icon: Compass },
+  { title: "Laporan",             path: "/staf/laporan",            icon: FileText },
+  { title: "Profil",              path: "/staf/profil",             icon: User },
+];
+
+const pencariKerjaNavItems = [
+  { title: "Dashboard", path: "/user/dashboard", icon: LayoutDashboard },
+  { title: "Profil", path: "/user/profile", icon: User },
+  { title: "Pelatihan", path: "/user/pelatihan", icon: BookOpen },
+  { title: "Sertifikasi", path: "/user/sertifikasi", icon: CreditCard },
+];
   const authItems = [
     { title: "Sign In", path: "/sign-in", icon: LogIn },
     { title: "Sign Up", path: "/sign-up", icon: UserPlus },
   ];
 
-  const docsItem = { title: "Documentation", path: "/docs", icon: BookOpen };
+
 
   /**
    * NavItem - Item navigasi sidebar menggunakan React Router NavLink
@@ -54,6 +84,28 @@ import { useState } from "react";
    */
   export function Sidebar({ onClose }) {
     const { isAuthenticated, user, logout } = useAuth();
+    let navItems = [];
+
+switch (user?.role) {
+  case "admin":
+    navItems = adminNavItems;
+    break;
+
+  case "staf":
+    navItems = stafNavItems;
+    break;
+
+  case "lpk":
+    navItems = lpkNavItems;
+    break;
+
+  case "pencari_kerja":
+    navItems = pencariKerjaNavItems;
+    break;
+
+  default:
+    navItems = [];
+}
 
     const handleLogout = async () => {
       await logout();
@@ -100,15 +152,6 @@ import { useState } from "react";
               ))}
             </div>
           )}
-
-          {/* Docs */}
-          {isAuthenticated && (
-            <div className="pt-4 border-t border-stone-200 mt-4 space-y-1">
-              <NavItem
-                item={docsItem}
-              />
-            </div>
-          )}
         </nav>
 
         {/* User Info & Logout - Tampil jika authenticated */}
@@ -117,11 +160,11 @@ import { useState } from "react";
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2 flex-1">
                 <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-semibold">
-                  {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                  {user?.nama?.charAt(0)?.toUpperCase() || 'U'}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-stone-900 truncate">
-                    {user?.name || 'User'}
+                    {user?.nama || 'User'}
                   </p>
                   <p className="text-xs text-stone-500 truncate">
                     {user?.email || 'user@example.com'}

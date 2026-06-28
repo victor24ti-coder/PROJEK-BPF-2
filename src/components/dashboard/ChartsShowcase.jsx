@@ -8,7 +8,6 @@ import {
   Tooltip, Legend,
   ResponsiveContainer,
 } from "recharts";
-import { areaChartData, lineChartData, pieChartData, barChartData } from "../data/dashboardData";
 
 /**
  * ChartCard - Wrapper card untuk setiap chart
@@ -35,59 +34,38 @@ const tooltipStyle = {
 };
 
 /**
- * ChartsShowcase - Grid 4 chart: Area, Line, Pie, Bar
+ * ChartsShowcase - Grid chart
  */
-export function ChartsShowcase() {
+export function ChartsShowcase({ grafik }) {
+  if (!grafik) return null;
+
+  const COLORS = ["#10B981", "#EF4444", "#F59E0B", "#3B82F6"];
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-      {/* Area Chart */}
-      <ChartCard title="Data Pelatihan & Peserta" subtitle="Statistik bulanan">
-        <ResponsiveContainer width="100%" height={300}>
-          <AreaChart data={areaChartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-            <defs>
-              <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="#22c55e" stopOpacity={0.05} />
-              </linearGradient>
-              <linearGradient id="colorExpenses" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#0c0a09" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="#0c0a09" stopOpacity={0.05} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
-            <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#6b7280" }} />
-            <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#6b7280" }} tickFormatter={(v) => `$${v.toLocaleString()}`} />
-            <Tooltip contentStyle={tooltipStyle} formatter={(v) => [`$${v.toLocaleString()}`, undefined]} />
-            <Legend />
-            <Area type="monotone" dataKey="sales" stroke="#1E88E5" strokeWidth={2} fill="url(#colorSales)" name="Pelatihan" />
-            <Area type="monotone" dataKey="expenses" stroke="#1565C0" strokeWidth={2} fill="url(#colorExpenses)" name="Peserta" />
-          </AreaChart>
-        </ResponsiveContainer>
-      </ChartCard>
 
-      {/* Line Chart */}
-      <ChartCard title="Aktivitas Sistem" subtitle="Aktivitas mingguan">
+      {/* Bar Chart */}
+      <ChartCard title="Peserta per Pelatihan" subtitle="Jumlah peserta di tiap program">
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={lineChartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+          <BarChart data={grafik.peserta_per_pelatihan} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
-            <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#6b7280" }} />
+            <XAxis dataKey="nama_pelatihan" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "#6b7280" }} width={100} />
             <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#6b7280" }} />
             <Tooltip contentStyle={tooltipStyle} />
             <Legend />
-            <Line type="monotone" dataKey="users" stroke="#1E88E5" strokeWidth={3} dot={{ fill: "#1E88E5", r: 4 }} activeDot={{ r: 6, fill: "#fff", stroke: "#1E88E5", strokeWidth: 2 }} name="Aktivitas" />
-            <Line type="monotone" dataKey="sessions" stroke="#1565C0" strokeWidth={3} dot={{ fill: "#1565C0", r: 4 }} activeDot={{ r: 6, fill: "#fff", stroke: "#1565C0", strokeWidth: 2 }} name="Laporan" />
-          </LineChart>
+            <Bar dataKey="peserta" fill="#3B82F6" radius={[4, 4, 0, 0]} name="Peserta" />
+          </BarChart>
         </ResponsiveContainer>
       </ChartCard>
 
       {/* Pie Chart */}
-      <ChartCard title="Distribusi Peserta" subtitle="Berdasarkan status kerja">
+      <ChartCard title="Tingkat Kelulusan" subtitle="Distribusi kelulusan peserta">
         <ResponsiveContainer width="100%" height={300}>
           <PieChart>
             <Tooltip contentStyle={tooltipStyle} />
             <Legend />
             <Pie
-              data={pieChartData}
+              data={grafik.tingkat_kelulusan}
               cx="50%"
               cy="50%"
               innerRadius={60}
@@ -95,28 +73,34 @@ export function ChartsShowcase() {
               paddingAngle={5}
               dataKey="value"
             >
-              {pieChartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.fill} />
+              {grafik.tingkat_kelulusan.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>
           </PieChart>
         </ResponsiveContainer>
       </ChartCard>
 
-      {/* Bar Chart */}
-      <ChartCard title="Kinerja Pelatihan" subtitle="Perbandingan peserta dan kelulusan">
+      {/* Area Chart / Line Chart */}
+      <ChartCard title="Penerbitan Sertifikat" subtitle="Jumlah sertifikat per bulan">
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={barChartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+          <AreaChart data={grafik.sertifikat_per_bulan} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+            <defs>
+              <linearGradient id="colorSertifikat" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#10B981" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="#10B981" stopOpacity={0.05} />
+              </linearGradient>
+            </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
-            <XAxis dataKey="category" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#6b7280" }} />
-            <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#6b7280" }} tickFormatter={(v) => `$${v.toLocaleString()}`} />
-            <Tooltip contentStyle={tooltipStyle} formatter={(v) => [`$${v.toLocaleString()}`, undefined]} />
+            <XAxis dataKey="bulan" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#6b7280" }} />
+            <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#6b7280" }} />
+            <Tooltip contentStyle={tooltipStyle} />
             <Legend />
-            <Bar dataKey="revenue" fill="#1E88E5" radius={[4, 4, 0, 0]} name="Peserta" />
-            <Bar dataKey="profit" fill="#1565C0" radius={[4, 4, 0, 0]} name="Lulus" />
-          </BarChart>
+            <Area type="monotone" dataKey="jumlah" stroke="#10B981" strokeWidth={2} fill="url(#colorSertifikat)" name="Sertifikat" />
+          </AreaChart>
         </ResponsiveContainer>
       </ChartCard>
+
     </div>
   );
 }
