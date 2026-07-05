@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { pelatihanAPI } from "../../../../services/api";
+import { lpkPortalAPI } from "../../../../services/api";
 import {
   ArrowLeft,
   Save,
@@ -27,7 +27,7 @@ export default function Edit() {
 
   useEffect(() => {
     setFetchLoading(true);
-    pelatihanAPI.getById(id)
+    lpkPortalAPI.pelatihan.getById(id)
     .then(res => {
       setForm(res.data.data);
       setFetchLoading(false);
@@ -51,7 +51,7 @@ export default function Edit() {
     setLoading(true);
 
     try {
-      await pelatihanAPI.update(id, form);
+      await lpkPortalAPI.pelatihan.update(id, form);
       alert("Pelatihan berhasil diperbarui.");
       navigate("/lpk/pelatihan");
     } catch (err) {
@@ -311,25 +311,25 @@ return (
               className="w-full border rounded-lg px-4 py-3"
             >
 
-              <option value="Dibuka">
+              <option value="dibuka">
 
                 Dibuka
 
               </option>
 
-              <option value="Aktif">
+              <option value="aktif">
 
                 Aktif
 
               </option>
 
-              <option value="Selesai">
+              <option value="selesai">
 
                 Selesai
 
               </option>
 
-              <option value="Ditutup">
+              <option value="ditutup">
 
                 Ditutup
 

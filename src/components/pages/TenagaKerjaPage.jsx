@@ -24,6 +24,10 @@ export default function TenagaKerjaPage() {
   const [errors, setErrors]     = useState({});
   const [saving, setSaving]     = useState(false);
 
+  // Detail state
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [detailData, setDetailData] = useState(null);
+
   // Custom delete state
   const [deleteId, setDeleteId] = useState(null);
   const [deleteNama, setDeleteNama] = useState('');
@@ -67,6 +71,11 @@ export default function TenagaKerjaPage() {
     } catch {
       alert('Gagal memuat data');
     }
+  };
+
+  const openDetail = (item) => {
+    setDetailData(item);
+    setShowDetailModal(true);
   };
 
   const handleDelete = (id, nama) => {
@@ -240,6 +249,12 @@ export default function TenagaKerjaPage() {
                   <td className="px-4 py-3">
                     <div className="flex gap-3">
                       <button
+                        onClick={() => openDetail(item)}
+                        className="text-stone-600 hover:text-blue-600 hover:underline text-sm"
+                      >
+                        Detail
+                      </button>
+                      <button
                         onClick={() => openEdit(item.id)}
                         className="text-blue-600 hover:underline text-sm"
                       >
@@ -378,6 +393,85 @@ export default function TenagaKerjaPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Detail */}
+      {showDetailModal && detailData && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 animate-fadeIn">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-2xl mx-4 p-6 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6 border-b pb-3">
+              <h3 className="text-xl font-bold text-stone-800">Detail Tenaga Kerja</h3>
+              <button onClick={() => setShowDetailModal(false)} className="text-stone-400 hover:text-stone-600">
+                &times;
+              </button>
+            </div>
+            
+            <div className="flex flex-col md:flex-row gap-6">
+              <div className="w-full md:w-1/3 flex flex-col items-center">
+                {detailData.foto ? (
+                  <img
+                    src={`http://127.0.0.1:8000/storage/${detailData.foto}`}
+                    alt={detailData.nama}
+                    className="w-40 h-40 object-cover rounded-2xl border-4 border-stone-100 shadow-sm"
+                    onError={(e) => { e.target.src = 'https://placehold.co/400x400?text=Foto'; }}
+                  />
+                ) : (
+                  <div className="w-40 h-40 bg-stone-100 text-stone-400 flex items-center justify-center rounded-2xl border-4 border-stone-50 font-semibold shadow-sm">
+                    Tanpa Foto
+                  </div>
+                )}
+                <div className="mt-4 text-center">
+                  <h4 className="text-lg font-bold text-stone-900">{detailData.nama}</h4>
+                  <p className="text-sm font-medium text-stone-500">NIK: {detailData.nik}</p>
+                </div>
+              </div>
+              
+              <div className="w-full md:w-2/3 grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6 bg-stone-50 p-5 rounded-xl border border-stone-100">
+                <div>
+                  <p className="text-xs font-semibold text-stone-500 uppercase tracking-wider">Email</p>
+                  <p className="text-sm text-stone-800 font-medium mt-1">{detailData.email || '-'}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-stone-500 uppercase tracking-wider">No HP</p>
+                  <p className="text-sm text-stone-800 font-medium mt-1">{detailData.no_hp || '-'}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-stone-500 uppercase tracking-wider">Jenis Kelamin</p>
+                  <p className="text-sm text-stone-800 font-medium mt-1">{detailData.jenis_kelamin === 'L' ? 'Laki-laki' : detailData.jenis_kelamin === 'P' ? 'Perempuan' : '-'}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-stone-500 uppercase tracking-wider">Tanggal Lahir</p>
+                  <p className="text-sm text-stone-800 font-medium mt-1">{detailData.tanggal_lahir || '-'}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-stone-500 uppercase tracking-wider">Pendidikan Terakhir</p>
+                  <p className="text-sm text-stone-800 font-medium mt-1">{detailData.pendidikan_terakhir || '-'}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-stone-500 uppercase tracking-wider">Status Pekerjaan</p>
+                  <p className="text-sm text-stone-800 font-medium mt-1">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      {detailData.status_pekerjaan || '-'}
+                    </span>
+                  </p>
+                </div>
+                <div className="sm:col-span-2 mt-2 pt-4 border-t border-stone-200">
+                  <p className="text-xs font-semibold text-stone-500 uppercase tracking-wider">Alamat Lengkap</p>
+                  <p className="text-sm text-stone-800 font-medium mt-1 leading-relaxed">{detailData.alamat || '-'}</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-8 flex justify-end">
+              <button
+                onClick={() => setShowDetailModal(false)}
+                className="bg-stone-900 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-stone-800 transition shadow-sm"
+              >
+                Tutup
+              </button>
+            </div>
           </div>
         </div>
       )}

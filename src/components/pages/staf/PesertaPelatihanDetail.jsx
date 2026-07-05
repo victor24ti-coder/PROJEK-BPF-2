@@ -4,7 +4,7 @@ import {
   ArrowLeft, Edit2, User, GraduationCap, Award, FileText,
   Loader2, AlertTriangle, Star
 } from "lucide-react";
-import { lpkPortalAPI } from "../../../../services/api";
+import API from "../../../services/api";
 
 const BACKEND = "http://127.0.0.1:8000/storage/";
 
@@ -32,7 +32,7 @@ export default function Detail() {
   const [error, setError]   = useState(null);
 
   useEffect(() => {
-    lpkPortalAPI.pesertaPelatihan.getById(id)
+    API.get(`/peserta-pelatihan/${id}`)
       .then(r => setData(r.data.data))
       .catch(() => setError("Gagal memuat detail peserta."))
       .finally(() => setLoading(false));
@@ -68,7 +68,7 @@ export default function Detail() {
             <p className="text-stone-500 text-sm mt-0.5">Informasi lengkap peserta pelatihan</p>
           </div>
         </div>
-        <Link to={`/lpk/peserta-pelatihan/edit/${data.id}`}
+        <Link to={`/staf/peserta-pelatihan/edit/${data.id}`}
           className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition shadow-sm">
           <Edit2 size={16} /> Edit / Nilai
         </Link>

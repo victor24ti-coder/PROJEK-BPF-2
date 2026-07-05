@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Search, Loader2, AlertTriangle, BookOpen, Eye, Edit2, Trash2, Calendar, Users, Award, GraduationCap } from "lucide-react";
-import { pelatihanAPI } from "../../../../services/api";
+import {
+  Plus, Search, Loader2, AlertTriangle, BookOpen, Eye, Edit2, Trash2,
+  Calendar, Users, Award, GraduationCap, Filter, X, ChevronRight, ArrowUpRight
+} from "lucide-react";
+import { lpkPortalAPI } from "../../../../services/api";
 
 export default function Index() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
-  
+
   // State untuk delete modal
   const [deleteId, setDeleteId] = useState(null);
   const [deleteNama, setDeleteNama] = useState("");
@@ -16,27 +19,20 @@ export default function Index() {
   const [deleting, setDeleting] = useState(false);
 
   // State untuk stats
-  const [stats, setStats] = useState({
-    total: 0,
-    aktif: 0,
-    selesai: 0,
-    kuota: 0
-  });
+  const [stats, setStats] = useState({ total: 0, aktif: 0, selesai: 0, kuota: 0 });
 
   const fetchData = async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await pelatihanAPI.getAll();
+      const res = await lpkPortalAPI.pelatihan.getAll();
       const rawData = res.data.data ?? [];
       setData(rawData);
 
-      // Hitung statistik singkat
       const total = rawData.length;
-      const aktif = rawData.filter(item => item.status === "Aktif" || item.status === "aktif" || item.status === "Dibuka").length;
-      const selesai = rawData.filter(item => item.status === "Selesai" || item.status === "selesai").length;
+      const aktif = rawData.filter(item => ["aktif", "dibuka"].includes((item.status || "").toLowerCase())).length;
+      const selesai = rawData.filter(item => (item.status || "").toLowerCase() === "selesai").length;
       const kuota = rawData.reduce((acc, curr) => acc + (parseInt(curr.kuota) || 0), 0);
-      
       setStats({ total, aktif, selesai, kuota });
     } catch (err) {
       console.error(err);
@@ -46,9 +42,7 @@ export default function Index() {
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  useEffect(() => { fetchData(); }, []);
 
   const handleDeleteClick = (id, nama) => {
     setDeleteId(id);
@@ -60,7 +54,7 @@ export default function Index() {
     if (!deleteId) return;
     setDeleting(true);
     try {
-      await pelatihanAPI.delete(deleteId);
+      await lpkPortalAPI.pelatihan.delete(deleteId);
       setShowDeleteModal(false);
       setDeleteId(null);
       setDeleteNama("");
@@ -73,247 +67,227 @@ export default function Index() {
     }
   };
 
-  // Filter data berdasarkan input pencarian
-  const filteredData = data.filter(item => 
+  const filteredData = data.filter(item =>
     (item.nama_pelatihan || "").toLowerCase().includes(search.toLowerCase()) ||
     (item.jenis_pelatihan || "").toLowerCase().includes(search.toLowerCase()) ||
     (item.jurusan || "").toLowerCase().includes(search.toLowerCase()) ||
     (item.status || "").toLowerCase().includes(search.toLowerCase())
   );
 
-  // Helper styling untuk status badge
   const getStatusBadge = (status) => {
-    const normStatus = (status || "").toLowerCase();
-    switch (normStatus) {
-      case "aktif":
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            Aktif
-          </span>
-        );
-      case "dibuka":
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-100">
-            <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-            Dibuka
-          </span>
-        );
-      case "selesai":
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-stone-100 text-stone-700 border border-stone-200">
-            <span className="w-1.5 h-1.5 rounded-full bg-stone-500" />
-            Selesai
-          </span>
-        );
-      case "ditutup":
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-50 text-red-700 border border-red-100">
-            <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
-            Ditutup
-          </span>
-        );
-      default:
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-50 text-gray-700 border border-gray-100">
-            {status}
-          </span>
-        );
-    }
+    const norm = (status || "").toLowerCase();
+    const map = {
+      aktif:   { dot: "bg-emerald-500 animate-pulse", cls: "bg-emerald-50 text-emerald-700 border-emerald-200", label: "Aktif" },
+      dibuka:  { dot: "bg-blue-500",                  cls: "bg-blue-50 text-blue-700 border-blue-200",         label: "Dibuka" },
+      selesai: { dot: "bg-stone-400",                 cls: "bg-stone-100 text-stone-600 border-stone-200",     label: "Selesai" },
+      ditutup: { dot: "bg-red-500",                   cls: "bg-red-50 text-red-700 border-red-200",            label: "Ditutup" },
+    };
+    const s = map[norm] || { dot: "bg-gray-400", cls: "bg-gray-50 text-gray-600 border-gray-200", label: status };
+    return (
+      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${s.cls}`}>
+        <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${s.dot}`} />
+        {s.label}
+      </span>
+    );
   };
 
+  const statCards = [
+    { label: "Total Kelas",  value: stats.total,            suffix: "kelas",  icon: BookOpen,      bg: "bg-blue-50",    ic: "text-blue-600",    accent: "bg-blue-500" },
+    { label: "Kelas Aktif",  value: stats.aktif,            suffix: "kelas",  icon: Award,         bg: "bg-emerald-50", ic: "text-emerald-600", accent: "bg-emerald-500" },
+    { label: "Selesai",      value: stats.selesai,          suffix: "kelas",  icon: GraduationCap, bg: "bg-stone-100",  ic: "text-stone-600",   accent: "bg-stone-400" },
+    { label: "Total Kuota",  value: stats.kuota,            suffix: "kursi",  icon: Users,         bg: "bg-purple-50",  ic: "text-purple-600",  accent: "bg-purple-500" },
+  ];
+
   return (
-    <div className="space-y-6">
-      
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-stone-850 tracking-tight">
-            Program Pelatihan Kerja
-          </h1>
-          <p className="text-stone-500 mt-1">
-            Kelola, lihat detail, perbarui, dan hapus kelas pelatihan yang diselenggarakan LPK Anda.
-          </p>
-        </div>
+    <div className="max-w-7xl mx-auto space-y-6">
 
-        <Link
-          to="/lpk/pelatihan/create"
-          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2 shadow-sm transition-all duration-150"
-        >
-          <Plus size={18} />
-          Tambah Pelatihan
-        </Link>
-      </div>
-
-      {/* Stats Section */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white p-4 rounded-xl border border-stone-200 shadow-sm flex items-center gap-4">
-          <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
-            <BookOpen className="w-5 h-5" />
+      {/* ═══════════════════════════════════════════════════════════ */}
+      {/* PAGE HEADER                                                */}
+      {/* ═══════════════════════════════════════════════════════════ */}
+      <div className="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
+        {/* Top accent bar */}
+        <div className="h-1.5 bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-500" />
+        <div className="px-6 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+              <BookOpen className="w-6 h-6 text-blue-600" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-stone-900">Program Pelatihan Kerja</h1>
+              <p className="text-sm text-stone-400 mt-0.5">
+                Kelola, lihat detail, perbarui, dan hapus program pelatihan LPK Anda.
+              </p>
+            </div>
           </div>
-          <div>
-            <p className="text-xs text-stone-500 font-semibold uppercase tracking-wider">Total Kelas</p>
-            <h4 className="text-xl font-bold text-stone-850 mt-0.5">{stats.total} Kelas</h4>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-xl border border-stone-200 shadow-sm flex items-center gap-4">
-          <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-            <Award className="w-5 h-5" />
-          </div>
-          <div>
-            <p className="text-xs text-stone-500 font-semibold uppercase tracking-wider">Kelas Aktif</p>
-            <h4 className="text-xl font-bold text-stone-850 mt-0.5">{stats.aktif} Kelas</h4>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-xl border border-stone-200 shadow-sm flex items-center gap-4">
-          <div className="w-10 h-10 rounded-lg bg-stone-100 text-stone-600 flex items-center justify-center">
-            <GraduationCap className="w-5 h-5" />
-          </div>
-          <div>
-            <p className="text-xs text-stone-500 font-semibold uppercase tracking-wider">Selesai</p>
-            <h4 className="text-xl font-bold text-stone-850 mt-0.5">{stats.selesai} Kelas</h4>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-xl border border-stone-200 shadow-sm flex items-center gap-4">
-          <div className="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
-            <Users className="w-5 h-5" />
-          </div>
-          <div>
-            <p className="text-xs text-stone-500 font-semibold uppercase tracking-wider">Total Kuota</p>
-            <h4 className="text-xl font-bold text-stone-850 mt-0.5">{stats.kuota} Kursi</h4>
-          </div>
+          <Link
+            to="/lpk/pelatihan/create"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-medium flex items-center justify-center gap-2 shadow-sm transition-all duration-150 text-sm flex-shrink-0"
+          >
+            <Plus size={16} />
+            Tambah Pelatihan
+          </Link>
         </div>
       </div>
 
-      {/* Table Card */}
+      {/* ═══════════════════════════════════════════════════════════ */}
+      {/* STAT CARDS                                                 */}
+      {/* ═══════════════════════════════════════════════════════════ */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {statCards.map((s, i) => {
+          const Icon = s.icon;
+          return (
+            <div key={i} className="bg-white rounded-xl border border-stone-200 shadow-sm p-5 relative overflow-hidden group hover:shadow-md transition-all duration-200">
+              <div className={`absolute top-0 left-0 right-0 h-0.5 ${s.accent} opacity-0 group-hover:opacity-100 transition-opacity`} />
+              <div className="flex items-center justify-between mb-3">
+                <div className={`w-10 h-10 rounded-xl ${s.bg} flex items-center justify-center group-hover:scale-110 transition-transform duration-200`}>
+                  <Icon className={`w-5 h-5 ${s.ic}`} />
+                </div>
+                <ArrowUpRight className="w-4 h-4 text-stone-300 group-hover:text-stone-500 transition-colors" />
+              </div>
+              <p className="text-2xl font-bold text-stone-900">{s.value}</p>
+              <p className="text-[11px] font-semibold text-stone-400 uppercase tracking-wider mt-1">
+                {s.label}
+              </p>
+              <div className={`absolute -right-3 -bottom-3 w-14 h-14 rounded-full opacity-[0.06] ${s.accent}`} />
+            </div>
+          );
+        })}
+      </div>
+
+      {/* ═══════════════════════════════════════════════════════════ */}
+      {/* TABLE CARD                                                  */}
+      {/* ═══════════════════════════════════════════════════════════ */}
       <div className="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
-        
-        {/* Search and Filters */}
-        <div className="p-5 border-b border-stone-150 flex flex-col sm:flex-row gap-4 items-center justify-between">
-          <div className="relative w-full sm:w-80">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <Search className="h-4 w-4 text-stone-400" />
-            </span>
+
+        {/* Toolbar */}
+        <div className="px-6 py-4 border-b border-stone-100 bg-stone-50/50 flex flex-col sm:flex-row gap-3 items-center justify-between">
+          <div className="relative w-full sm:w-72">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400 pointer-events-none" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Cari pelatihan, kejuruan, atau status..."
-              className="w-full pl-9 pr-4 py-2 text-sm bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-150"
+              placeholder="Cari pelatihan, kejuruan, status..."
+              className="w-full pl-9 pr-4 py-2 text-sm bg-white border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             />
+            {search && (
+              <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600">
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
-          <div className="text-xs text-stone-500 font-medium">
-            Menampilkan {filteredData.length} dari {data.length} data pelatihan
+          <div className="flex items-center gap-2 text-xs text-stone-400">
+            <Filter className="w-3.5 h-3.5" />
+            <span>Menampilkan <span className="font-semibold text-stone-600">{filteredData.length}</span> dari <span className="font-semibold text-stone-600">{data.length}</span> data</span>
           </div>
         </div>
 
-        {/* Error Alert */}
+        {/* Error */}
         {error && (
           <div className="m-5 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-3">
-            <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0" />
-            <div className="text-sm font-medium">{error}</div>
+            <AlertTriangle className="h-5 w-5 flex-shrink-0" />
+            <span className="text-sm font-medium">{error}</span>
           </div>
         )}
 
-        {/* Data Table */}
+        {/* Table */}
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-stone-200">
-            <thead className="bg-stone-50">
-              <tr>
-                <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold text-stone-600 uppercase tracking-wider w-16">
-                  #
-                </th>
-                <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold text-stone-600 uppercase tracking-wider">
-                  Nama Program Pelatihan
-                </th>
-                <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold text-stone-600 uppercase tracking-wider">
-                  Kejuruan / Bidang
-                </th>
-                <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold text-stone-600 uppercase tracking-wider">
-                  Jenis
-                </th>
-                <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold text-stone-600 uppercase tracking-wider w-28">
-                  Kuota
-                </th>
-                <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold text-stone-600 uppercase tracking-wider w-28">
-                  Status
-                </th>
-                <th scope="col" className="px-6 py-3.5 text-center text-xs font-semibold text-stone-600 uppercase tracking-wider w-36">
-                  Aksi
-                </th>
+          <table className="min-w-full">
+            <thead>
+              <tr className="border-b border-stone-100">
+                <th className="px-6 py-3.5 text-left text-[11px] font-semibold text-stone-400 uppercase tracking-wider w-12">#</th>
+                <th className="px-6 py-3.5 text-left text-[11px] font-semibold text-stone-400 uppercase tracking-wider">Nama Program</th>
+                <th className="px-6 py-3.5 text-left text-[11px] font-semibold text-stone-400 uppercase tracking-wider">Kejuruan</th>
+                <th className="px-6 py-3.5 text-left text-[11px] font-semibold text-stone-400 uppercase tracking-wider">Jenis</th>
+                <th className="px-6 py-3.5 text-left text-[11px] font-semibold text-stone-400 uppercase tracking-wider">Kuota</th>
+                <th className="px-6 py-3.5 text-left text-[11px] font-semibold text-stone-400 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3.5 text-center text-[11px] font-semibold text-stone-400 uppercase tracking-wider w-32">Aksi</th>
               </tr>
             </thead>
-            
-            <tbody className="bg-white divide-y divide-stone-150">
+
+            <tbody className="divide-y divide-stone-50">
               {loading ? (
-                Array.from({ length: 4 }).map((_, index) => (
-                  <tr key={`skeleton-${index}`} className="animate-pulse">
-                    <td className="px-6 py-4"><div className="h-4 bg-stone-200 rounded w-6"></div></td>
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={i} className="animate-pulse">
+                    <td className="px-6 py-4"><div className="h-3.5 bg-stone-100 rounded w-6" /></td>
                     <td className="px-6 py-4">
-                      <div className="h-4 bg-stone-200 rounded w-48 mb-2"></div>
-                      <div className="h-3 bg-stone-100 rounded w-36"></div>
+                      <div className="h-4 bg-stone-100 rounded w-52 mb-2" />
+                      <div className="h-3 bg-stone-100 rounded w-36" />
                     </td>
-                    <td className="px-6 py-4"><div className="h-4 bg-stone-200 rounded w-24"></div></td>
-                    <td className="px-6 py-4"><div className="h-4 bg-stone-200 rounded w-16"></div></td>
-                    <td className="px-6 py-4"><div className="h-4 bg-stone-200 rounded w-12"></div></td>
-                    <td className="px-6 py-4"><div className="h-5 bg-stone-200 rounded-full w-20"></div></td>
-                    <td className="px-6 py-4"><div className="h-6 bg-stone-200 rounded-lg w-24 mx-auto"></div></td>
+                    <td className="px-6 py-4"><div className="h-5 bg-stone-100 rounded-md w-24" /></td>
+                    <td className="px-6 py-4"><div className="h-3.5 bg-stone-100 rounded w-20" /></td>
+                    <td className="px-6 py-4"><div className="h-3.5 bg-stone-100 rounded w-14" /></td>
+                    <td className="px-6 py-4"><div className="h-5 bg-stone-100 rounded-full w-20" /></td>
+                    <td className="px-6 py-4"><div className="h-6 bg-stone-100 rounded-lg w-24 mx-auto" /></td>
                   </tr>
                 ))
               ) : filteredData.length > 0 ? (
                 filteredData.map((item, index) => (
-                  <tr key={item.id} className="hover:bg-stone-50/50 transition-colors duration-100">
-                    <td className="px-6 py-4 text-sm font-medium text-stone-500">
-                      {index + 1}.
-                    </td>
+                  <tr key={item.id} className="hover:bg-blue-50/30 transition-colors duration-100 group">
+                    {/* No */}
+                    <td className="px-6 py-4 text-sm font-medium text-stone-400">{index + 1}</td>
+
+                    {/* Nama & Tanggal */}
                     <td className="px-6 py-4">
-                      <div className="text-sm font-bold text-stone-850 hover:text-blue-600 transition-colors">
-                        <Link to={`/lpk/pelatihan/detail/${item.id}`}>{item.nama_pelatihan}</Link>
-                      </div>
-                      <div className="flex items-center gap-1.5 text-xs text-stone-400 mt-1">
-                        <Calendar className="w-3.5 h-3.5" />
+                      <Link
+                        to={`/lpk/pelatihan/detail/${item.id}`}
+                        className="text-sm font-semibold text-stone-800 hover:text-blue-600 transition-colors group-hover:text-blue-600 flex items-center gap-1.5"
+                      >
+                        <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+                          <BookOpen className="w-3.5 h-3.5 text-blue-600" />
+                        </div>
+                        <span className="truncate max-w-[220px]">{item.nama_pelatihan}</span>
+                      </Link>
+                      <div className="flex items-center gap-1.5 text-xs text-stone-400 mt-1.5 ml-9">
+                        <Calendar className="w-3 h-3" />
                         <span>{item.tanggal_mulai} s/d {item.tanggal_selesai}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm">
-                      <span className="inline-flex px-2.5 py-0.5 rounded-md text-xs font-medium bg-stone-100 text-stone-700 border border-stone-200">
-                        {item.jurusan}
+
+                    {/* Kejuruan */}
+                    <td className="px-6 py-4">
+                      <span className="inline-flex px-2.5 py-1 rounded-md text-xs font-medium bg-stone-100 text-stone-600 border border-stone-200">
+                        {item.jurusan || "-"}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-stone-600">
-                      {item.jenis_pelatihan}
+
+                    {/* Jenis */}
+                    <td className="px-6 py-4 text-sm text-stone-500">{item.jenis_pelatihan || "-"}</td>
+
+                    {/* Kuota */}
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-1.5 text-sm text-stone-600 font-medium">
+                        <Users className="w-3.5 h-3.5 text-stone-400" />
+                        {item.kuota}
+                      </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-stone-600 font-semibold">
-                      {item.kuota} Kursi
-                    </td>
-                    <td className="px-6 py-4 text-sm">
-                      {getStatusBadge(item.status)}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-center">
-                      <div className="flex items-center justify-center gap-2.5">
+
+                    {/* Status */}
+                    <td className="px-6 py-4">{getStatusBadge(item.status)}</td>
+
+                    {/* Aksi */}
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-center gap-1">
                         <Link
                           to={`/lpk/pelatihan/detail/${item.id}`}
-                          className="text-stone-500 hover:text-blue-600 p-1.5 rounded-lg hover:bg-stone-100 transition-all duration-150"
-                          title="Detail Pelatihan"
+                          className="p-2 rounded-lg text-stone-400 hover:text-blue-600 hover:bg-blue-50 transition-all duration-150"
+                          title="Lihat Detail"
                         >
-                          <Eye size={17} />
+                          <Eye size={15} />
                         </Link>
                         <Link
                           to={`/lpk/pelatihan/edit/${item.id}`}
-                          className="text-stone-500 hover:text-amber-600 p-1.5 rounded-lg hover:bg-stone-100 transition-all duration-150"
-                          title="Ubah Pelatihan"
+                          className="p-2 rounded-lg text-stone-400 hover:text-amber-600 hover:bg-amber-50 transition-all duration-150"
+                          title="Edit Pelatihan"
                         >
-                          <Edit2 size={17} />
+                          <Edit2 size={15} />
                         </Link>
                         <button
                           onClick={() => handleDeleteClick(item.id, item.nama_pelatihan)}
-                          className="text-stone-500 hover:text-red-600 p-1.5 rounded-lg hover:bg-stone-100 transition-all duration-150"
+                          className="p-2 rounded-lg text-stone-400 hover:text-red-600 hover:bg-red-50 transition-all duration-150"
                           title="Hapus Pelatihan"
                         >
-                          <Trash2 size={17} />
+                          <Trash2 size={15} />
                         </button>
                       </div>
                     </td>
@@ -321,48 +295,83 @@ export default function Index() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="7" className="px-6 py-12 text-center text-sm text-stone-500">
-                    {search ? `Tidak ada pelatihan ditemukan untuk "${search}"` : "Belum ada program pelatihan kerja yang ditambahkan."}
+                  <td colSpan="7" className="px-6 py-16 text-center">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-16 h-16 rounded-2xl bg-stone-100 flex items-center justify-center">
+                        <BookOpen className="w-7 h-7 text-stone-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-stone-600">
+                          {search ? `Tidak ada hasil untuk "${search}"` : "Belum ada program pelatihan"}
+                        </p>
+                        <p className="text-xs text-stone-400 mt-1">
+                          {search ? "Coba kata kunci yang berbeda" : "Mulai dengan menambahkan program pelatihan pertama Anda"}
+                        </p>
+                      </div>
+                      {!search && (
+                        <Link to="/lpk/pelatihan/create" className="mt-1 flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-700 font-medium">
+                          <Plus className="w-3.5 h-3.5" /> Tambah Pelatihan
+                        </Link>
+                      )}
+                    </div>
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
+
+        {/* Footer */}
+        {!loading && filteredData.length > 0 && (
+          <div className="px-6 py-3 border-t border-stone-100 bg-stone-50/30 flex items-center justify-between">
+            <p className="text-xs text-stone-400">
+              Total <span className="font-semibold text-stone-600">{filteredData.length}</span> program pelatihan
+            </p>
+            <div className="flex items-center gap-1 text-xs text-stone-400">
+              <ChevronRight className="w-3.5 h-3.5" />
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Delete Confirmation Modal */}
+      {/* ═══════════════════════════════════════════════════════════ */}
+      {/* DELETE CONFIRMATION MODAL                                  */}
+      {/* ═══════════════════════════════════════════════════════════ */}
       {showDeleteModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 animate-fadeIn">
-          <div className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 p-6">
-            <h3 className="text-lg font-bold text-stone-850 mb-2">Konfirmasi Hapus</h3>
-            <p className="text-sm text-stone-600 leading-relaxed mb-6">
-              Apakah Anda yakin ingin menghapus program pelatihan <strong>{deleteNama}</strong>? Tindakan ini akan menghapus data secara permanen dan tidak dapat dibatalkan.
-            </p>
-            <div className="flex gap-2.5 justify-end">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+            {/* Modal header */}
+            <div className="px-6 pt-6 pb-4">
+              <div className="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center mb-4">
+                <Trash2 className="w-6 h-6 text-red-500" />
+              </div>
+              <h3 className="text-lg font-bold text-stone-900">Hapus Program Pelatihan?</h3>
+              <p className="text-sm text-stone-500 mt-2 leading-relaxed">
+                Program <span className="font-semibold text-stone-700">"{deleteNama}"</span> akan dihapus secara permanen dan tidak dapat dipulihkan kembali.
+              </p>
+            </div>
+
+            {/* Modal footer */}
+            <div className="px-6 pb-6 flex gap-3">
               <button
-                onClick={() => {
-                  setShowDeleteModal(false);
-                  setDeleteId(null);
-                  setDeleteNama("");
-                }}
-                className="border border-stone-300 px-4 py-2 rounded-lg text-sm hover:bg-stone-55 transition text-stone-700 font-medium"
+                onClick={() => { setShowDeleteModal(false); setDeleteId(null); setDeleteNama(""); }}
+                className="flex-1 border border-stone-200 px-4 py-2.5 rounded-xl text-sm hover:bg-stone-50 transition text-stone-700 font-medium"
               >
                 Batal
               </button>
               <button
                 onClick={confirmDelete}
                 disabled={deleting}
-                className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-700 transition disabled:opacity-50 font-medium flex items-center gap-2"
+                className="flex-1 bg-red-600 text-white px-4 py-2.5 rounded-xl text-sm hover:bg-red-700 transition disabled:opacity-50 font-medium flex items-center justify-center gap-2"
               >
-                {deleting && <Loader2 className="w-4 h-4 animate-spin" />}
+                {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                 {deleting ? "Menghapus..." : "Ya, Hapus"}
               </button>
             </div>
           </div>
         </div>
       )}
-      
+
     </div>
   );
 }

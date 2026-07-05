@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Save, Loader2, Upload, FileText, X } from "lucide-react";
-import { sertifikasiAPI, pesertaPelatihanAPI } from "../../../../services/api";
+import { lpkPortalAPI } from "../../../../services/api";
 
 export default function Create() {
   const navigate = useNavigate();
@@ -12,6 +12,7 @@ export default function Create() {
     lembaga_sertifikasi:  "",
     nomor_sertifikat:     "",
     tanggal_terbit:       "",
+    value:                "",
     masa_berlaku:         "",
     status_sertifikat:    "aktif",
   });
@@ -22,7 +23,7 @@ export default function Create() {
 
   useEffect(() => {
     // Ambil semua peserta pelatihan
-    pesertaPelatihanAPI.getAll("paginate=false").then(r => {
+    lpkPortalAPI.pesertaPelatihan.getAll("paginate=false").then(r => {
       const payload = r.data.data;
       setPesertas(Array.isArray(payload) ? payload : (payload?.data ?? []));
     }).catch(() => {});
@@ -66,7 +67,7 @@ export default function Create() {
 
     setSaving(true);
     try {
-      await sertifikasiAPI.create(fd);
+      await lpkPortalAPI.sertifikasi.create(fd);
       navigate("/lpk/sertifikasi");
     } catch (err) {
       const data = err.response?.data;

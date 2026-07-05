@@ -67,10 +67,16 @@ export const authAPI = {
   getCurrentUser: () => {
     return API.get('/me');
   },
+  changePassword: (data) => {
+    return API.post('/change-password', data);
+  },
+  updateLpkProfile: (data) => {
+    return API.put('/lpk/profile', data);
+  },
 };
 
 /**
- * Pelatihan API Endpoints
+ * Pelatihan API Endpoints (untuk Admin/semua role)
  */
 export const pelatihanAPI = {
   getAll: () => API.get('/lpk/pelatihan'),
@@ -79,6 +85,64 @@ export const pelatihanAPI = {
   update: (id, data) => API.put(`/lpk/pelatihan/${id}`, data),
   delete: (id) => API.delete(`/lpk/pelatihan/${id}`),
 };
+
+/**
+ * LPK Portal API Endpoints
+ * Khusus untuk role LPK — semua request di-scope ke data milik LPK yang login.
+ * Base prefix: /lpk-portal/
+ */
+export const lpkPortalAPI = {
+  // ── Pelatihan ──────────────────────────────────────────
+  pelatihan: {
+    getAll:  ()         => API.get('/lpk-portal/pelatihan'),
+    getById: (id)       => API.get(`/lpk-portal/pelatihan/${id}`),
+    create:  (data)     => API.post('/lpk-portal/pelatihan', data),
+    update:  (id, data) => API.put(`/lpk-portal/pelatihan/${id}`, data),
+    delete:  (id)       => API.delete(`/lpk-portal/pelatihan/${id}`),
+  },
+
+  // ── Peserta Pelatihan ───────────────────────────────────
+  pesertaPelatihan: {
+    getAll:   (params = '') => API.get(`/lpk-portal/peserta-pelatihan?${params}`),
+    getById:  (id)          => API.get(`/lpk-portal/peserta-pelatihan/${id}`),
+    create:   (formData)    => API.post('/lpk-portal/peserta-pelatihan', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    }),
+    update:   (id, formData) => API.post(`/lpk-portal/peserta-pelatihan/${id}?_method=PUT`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    }),
+    delete:          (id)   => API.delete(`/lpk-portal/peserta-pelatihan/${id}`),
+    importPreview:   (data) => API.post('/lpk-portal/peserta-pelatihan/import-preview', data),
+    importCommit:    (data) => API.post('/lpk-portal/peserta-pelatihan/import-commit', data),
+    getImportHistory: (params = '') => API.get(`/lpk-portal/peserta-pelatihan/import-history?${params}`),
+  },
+
+  // ── Sertifikasi ─────────────────────────────────────────
+  sertifikasi: {
+    getAll:   (params = '') => API.get(`/lpk-portal/sertifikasi?${params}`),
+    getById:  (id)          => API.get(`/lpk-portal/sertifikasi/${id}`),
+    create:   (formData)    => API.post('/lpk-portal/sertifikasi', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    }),
+    update:   (id, formData) => API.post(`/lpk-portal/sertifikasi/${id}?_method=PUT`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    }),
+    delete:   (id)          => API.delete(`/lpk-portal/sertifikasi/${id}`),
+    download: (id)          => API.get(`/lpk-portal/sertifikasi/${id}/download`, { responseType: 'blob' }),
+  },
+
+  // ── Laporan ─────────────────────────────────────────────
+  laporan: {
+    getDashboard: (params = '') => API.get(`/lpk-portal/laporan/dashboard?${params}`),
+  },
+
+  // ── Tenaga Kerja (read-only untuk pencarian peserta) ────
+  tenagaKerja: {
+    getAll: (paginate = 'true', search = '') =>
+      API.get(`/lpk-portal/tenaga-kerja?paginate=${paginate}&search=${search}`),
+  },
+};
+
 
 /**
  * Pemagangan API Endpoints

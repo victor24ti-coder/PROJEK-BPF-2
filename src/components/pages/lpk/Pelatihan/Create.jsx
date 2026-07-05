@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { pelatihanAPI } from "../../../../services/api";
+import { lpkPortalAPI } from "../../../../services/api";
 import {
   ArrowLeft,
   Save,
@@ -20,7 +20,7 @@ export default function Create() {
     jurusan: "",
     deskripsi: "",
     kuota: "",
-    status: "Dibuka",
+    status: "dibuka",
     tanggal_mulai: "",
     tanggal_selesai: "",
   });
@@ -37,7 +37,7 @@ const handleSubmit = async (e) => {
     setLoading(true);
 
     try {
-      await pelatihanAPI.create(form);
+      await lpkPortalAPI.pelatihan.create(form);
       alert("Pelatihan berhasil ditambahkan.");
       navigate("/lpk/pelatihan");
     } catch (err) {
@@ -261,13 +261,13 @@ const handleSubmit = async (e) => {
               className="w-full border rounded-lg px-4 py-3"
             >
 
-              <option>Dibuka</option>
+              <option value="dibuka">Dibuka</option>
 
-              <option>Aktif</option>
+              <option value="aktif">Aktif</option>
 
-              <option>Selesai</option>
+              <option value="selesai">Selesai</option>
 
-              <option>Ditutup</option>
+              <option value="ditutup">Ditutup</option>
 
             </select>
 

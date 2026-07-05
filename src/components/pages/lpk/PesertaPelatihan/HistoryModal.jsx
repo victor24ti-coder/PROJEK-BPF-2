@@ -3,7 +3,7 @@ import {
   X, Loader2, History, AlertTriangle, ChevronLeft, ChevronRight,
   User, Calendar, FileText
 } from "lucide-react";
-import { pesertaPelatihanAPI } from "../../../../services/api";
+import { lpkPortalAPI } from "../../../../services/api";
 
 export default function HistoryModal({ isOpen, onClose }) {
   const [data, setData] = useState([]);
@@ -16,7 +16,7 @@ export default function HistoryModal({ isOpen, onClose }) {
     setLoading(true);
     setErrorMsg(null);
     try {
-      const response = await pesertaPelatihanAPI.getImportHistory(`page=${pg}`);
+      const response = await lpkPortalAPI.pesertaPelatihan.getImportHistory(`page=${pg}`);
       if (response.data.success) {
         const payload = response.data.data;
         setData(payload.data ?? []);

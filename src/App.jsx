@@ -46,6 +46,10 @@ const TracerStudyPage = lazy(() => import('./components/pages/TracerStudyPage'))
 const TenagaKerjaPage = lazy(() => import('./components/pages/TenagaKerjaPage'));
 const LaporanPage = lazy(() => import('./components/pages/LaporanPage'));
 const UsersPage = lazy(() => import('./components/pages/UsersPage'));
+const PesertaPelatihanPage = lazy(() => import('./components/pages/staf/PesertaPelatihanPage'));
+const StafPesertaCreate = lazy(() => import('./components/pages/staf/PesertaPelatihanCreate'));
+const StafPesertaEdit = lazy(() => import('./components/pages/staf/PesertaPelatihanEdit'));
+const StafPesertaDetail = lazy(() => import('./components/pages/staf/PesertaPelatihanDetail'));
 
 
 // Sign In dan Sign Up juga di-lazy load, tapi bisa di-import langsung jika perlu
@@ -223,7 +227,10 @@ function AppRoutes() {
         <Route path="dashboard"         element={<Suspense fallback={<LoadingFallback />}><StafDashboard /></Suspense>} />
         <Route path="tenaga-kerja"       element={<Suspense fallback={<LoadingFallback />}><TenagaKerjaPage /></Suspense>} />
         <Route path="pelatihan"          element={<Suspense fallback={<LoadingFallback />}><StafPelatihan /></Suspense>} />
-        <Route path="peserta-pelatihan"  element={<Suspense fallback={<LoadingFallback />}><PemaganganPage /></Suspense>} />
+        <Route path="peserta-pelatihan"          element={<Suspense fallback={<LoadingFallback />}><PesertaPelatihanPage /></Suspense>} />
+        <Route path="peserta-pelatihan/create"   element={<Suspense fallback={<LoadingFallback />}><StafPesertaCreate /></Suspense>} />
+        <Route path="peserta-pelatihan/edit/:id" element={<Suspense fallback={<LoadingFallback />}><StafPesertaEdit /></Suspense>} />
+        <Route path="peserta-pelatihan/detail/:id" element={<Suspense fallback={<LoadingFallback />}><StafPesertaDetail /></Suspense>} />
         <Route path="sertifikasi"        element={<Suspense fallback={<LoadingFallback />}><SertifikasiPage /></Suspense>} />
         <Route path="perusahaan"         element={<Suspense fallback={<LoadingFallback />}><PerusahaanPage /></Suspense>} />
         <Route path="job-fair"           element={<Suspense fallback={<LoadingFallback />}><JobFairPage /></Suspense>} />

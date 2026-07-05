@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Save, Loader2, Upload, X, User } from "lucide-react";
-import { lpkPortalAPI } from "../../../../services/api";
+import API from "../../../services/api";
 
 const BACKEND = "http://127.0.0.1:8000/storage/";
 
@@ -24,7 +24,7 @@ export default function Edit() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await lpkPortalAPI.pesertaPelatihan.getById(id);
+        const res = await API.get(`/peserta-pelatihan/${id}`);
         const d   = res.data.data;
         setPeserta(d);
         setForm({
@@ -74,8 +74,8 @@ export default function Edit() {
 
     setSaving(true);
     try {
-      await lpkPortalAPI.pesertaPelatihan.update(id, fd);
-      navigate("/lpk/peserta-pelatihan");
+      await API.post(`/peserta-pelatihan/${id}?_method=PUT`, fd);
+      navigate("/staf/peserta-pelatihan");
     } catch (err) {
       const data = err.response?.data;
       if (data?.errors) setErrors(data.errors);

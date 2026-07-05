@@ -10,7 +10,7 @@ import {
   Clock,
   Building2,
 } from "lucide-react";
-import { pelatihanAPI } from "../../../../services/api";
+import { lpkPortalAPI } from "../../../../services/api";
 
 export default function Detail() {
 
@@ -23,7 +23,7 @@ export default function Detail() {
 
   useEffect(() => {
     setLoading(true);
-    pelatihanAPI.getById(id)
+    lpkPortalAPI.pelatihan.getById(id)
       .then((res) => {
         setPelatihan(res.data.data);
         setLoading(false);
