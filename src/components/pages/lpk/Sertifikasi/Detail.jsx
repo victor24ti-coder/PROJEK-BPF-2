@@ -4,7 +4,7 @@ import {
   ArrowLeft, Edit2, Download, FileText, Loader2, AlertTriangle,
   Award, CheckCircle, XCircle, Calendar, User, BookOpen, Hash
 } from "lucide-react";
-import { sertifikasiAPI } from "../../../../services/api";
+import { lpkPortalAPI } from "../../../../services/api";
 
 const BACKEND = "http://127.0.0.1:8000/storage/";
 
@@ -30,7 +30,7 @@ export default function Detail() {
   const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
-    sertifikasiAPI.getById(id)
+    lpkPortalAPI.sertifikasi.getById(id)
       .then(r => setData(r.data.data))
       .catch(() => setError("Gagal memuat detail sertifikat."))
       .finally(() => setLoading(false));
@@ -39,7 +39,7 @@ export default function Detail() {
   const handleDownload = async () => {
     setDownloading(true);
     try {
-      const res  = await sertifikasiAPI.download(id);
+      const res  = await lpkPortalAPI.sertifikasi.download(id);
       const url  = URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
       const link = document.createElement('a');
       link.href     = url;

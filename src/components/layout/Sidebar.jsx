@@ -84,7 +84,7 @@ const pencariKerjaNavItems = [
    */
   export function Sidebar({ onClose }) {
     const { isAuthenticated, user, logout } = useAuth();
-    let navItems = [];
+    let navItems;
 
 switch (user?.role) {
   case "admin":
@@ -198,7 +198,7 @@ switch (user?.role) {
     };
 
     return (
-      <header className="h-14 bg-white/80 backdrop-blur-sm border-b border-stone-200 px-4 flex items-center justify-between flex-shrink-0">
+      <header className="h-14 bg-white/80 backdrop-blur-sm border-b border-stone-200 px-4 flex items-center justify-between flex-shrink-0 relative z-50">
         <div className="flex items-center gap-2">
           <button
             onClick={onMenuOpen}
@@ -250,7 +250,6 @@ switch (user?.role) {
               <span className="hidden sm:block">Guest</span>
             </button>
           )}
-          <Bell className="w-4 h-4 text-stone-500 cursor-pointer hover:text-stone-900 transition-colors" />
         </div>
       </header>
     );

@@ -1,7 +1,7 @@
+import { lpkPortalAPI } from "../../../../services/api";
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Save, Loader2, Upload, FileText, X } from "lucide-react";
-import { sertifikasiAPI } from "../../../../services/api";
+import { useParams, useNavigate } from "react-router-dom";
+import { Loader2, ArrowLeft, FileText, X, Upload, Save } from "lucide-react";
 
 const BACKEND = "http://127.0.0.1:8000/storage/";
 
@@ -25,7 +25,7 @@ export default function Edit() {
   const [errors,      setErrors]      = useState({});
 
   useEffect(() => {
-    sertifikasiAPI.getById(id).then(r => {
+    lpkPortalAPI.sertifikasi.getById(id).then(r => {
       const d = r.data.data;
       setSertifikasi(d);
       setCurrentFile(d.file_sertifikat ?? null);
@@ -75,7 +75,7 @@ export default function Edit() {
 
     setSaving(true);
     try {
-      await sertifikasiAPI.update(id, fd);
+      await lpkPortalAPI.sertifikasi.update(id, fd);
       navigate("/lpk/sertifikasi");
     } catch (err) {
       const data = err.response?.data;

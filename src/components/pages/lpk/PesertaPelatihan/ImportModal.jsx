@@ -4,7 +4,7 @@ import {
   X, Upload, FileSpreadsheet, Loader2, AlertTriangle, CheckCircle,
   HelpCircle, Info
 } from "lucide-react";
-import { pesertaPelatihanAPI } from "../../../../services/api";
+import { lpkPortalAPI } from "../../../../services/api";
 
 export default function ImportModal({ isOpen, onClose, onSuccess, pelatihans }) {
   const [pelatihanId, setPelatihanId] = useState("");
@@ -61,7 +61,7 @@ export default function ImportModal({ isOpen, onClose, onSuccess, pelatihans }) 
         }
 
         // Call backend for validation preview
-        const response = await pesertaPelatihanAPI.importPreview({
+        const response = await lpkPortalAPI.pesertaPelatihan.importPreview({
           pelatihan_id: pelatihanId,
           data: rawData
         });
@@ -94,7 +94,7 @@ export default function ImportModal({ isOpen, onClose, onSuccess, pelatihans }) 
 
     setImporting(true);
     try {
-      const response = await pesertaPelatihanAPI.importCommit({
+      const response = await lpkPortalAPI.pesertaPelatihan.importCommit({
         pelatihan_id: pelatihanId,
         filename: file.name,
         data: validRows

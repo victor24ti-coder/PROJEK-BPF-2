@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Save, Loader2, Upload, X, User } from "lucide-react";
-import { pesertaPelatihanAPI, pelatihanAPI, tenagaKerjaAPI } from "../../../../services/api";
+import { lpkPortalAPI } from "../../../../services/api";
 
 export default function Create() {
   const navigate = useNavigate();
@@ -20,8 +20,8 @@ export default function Create() {
   const [errors, setErrors]       = useState({});
 
   useEffect(() => {
-    pelatihanAPI.getAll().then(r => setPelatihans(r.data.data ?? [])).catch(() => {});
-    tenagaKerjaAPI.getAll('false').then(r => {
+    lpkPortalAPI.pelatihan.getAll().then(r => setPelatihans(r.data.data ?? [])).catch(() => {});
+    lpkPortalAPI.tenagaKerja.getAll('false').then(r => {
       // Support both paginated and flat response shapes
       const payload = r.data.data;
       setWorkers(Array.isArray(payload) ? payload : (payload?.data ?? []));
@@ -69,7 +69,7 @@ export default function Create() {
 
     setSaving(true);
     try {
-      await pesertaPelatihanAPI.create(fd);
+      await lpkPortalAPI.pesertaPelatihan.create(fd);
       navigate("/lpk/peserta-pelatihan");
     } catch (err) {
       const data = err.response?.data;

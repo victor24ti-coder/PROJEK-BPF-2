@@ -19,6 +19,10 @@ export default function PerusahaanPage() {
   const [errors, setErrors]     = useState({});
   const [saving, setSaving]     = useState(false);
 
+  // Detail state
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [detailData, setDetailData] = useState(null);
+
   // Custom delete state
   const [deleteId, setDeleteId] = useState(null);
   const [deleteNama, setDeleteNama] = useState('');
@@ -60,6 +64,11 @@ export default function PerusahaanPage() {
     } catch {
       alert('Gagal memuat data');
     }
+  };
+
+  const openDetail = (item) => {
+    setDetailData(item);
+    setShowDetailModal(true);
   };
 
   const handleDelete = (id, nama) => {
@@ -179,6 +188,12 @@ export default function PerusahaanPage() {
                   <td className="px-4 py-3">
                     <div className="flex gap-3">
                       <button
+                        onClick={() => openDetail(item)}
+                        className="text-stone-600 hover:text-blue-600 hover:underline text-sm"
+                      >
+                        Detail
+                      </button>
+                      <button
                         onClick={() => openEdit(item.id)}
                         className="text-blue-600 hover:underline text-sm"
                       >
@@ -263,6 +278,51 @@ export default function PerusahaanPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Detail */}
+      {showDetailModal && detailData && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 animate-fadeIn">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-xl mx-4 p-6 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6 border-b pb-3">
+              <h3 className="text-xl font-bold text-stone-800">Detail Perusahaan Mitra</h3>
+              <button onClick={() => setShowDetailModal(false)} className="text-stone-400 hover:text-stone-600">
+                &times;
+              </button>
+            </div>
+            
+            <div className="bg-stone-50 p-6 rounded-xl border border-stone-100">
+              <div className="mb-6">
+                <h4 className="text-2xl font-bold text-stone-900">{detailData.nama_perusahaan}</h4>
+                <p className="text-sm font-medium text-stone-500 mt-1">{detailData.bidang_usaha || '-'}</p>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-5 gap-x-6">
+                <div>
+                  <p className="text-xs font-semibold text-stone-500 uppercase tracking-wider">Kontak (No HP/Telp)</p>
+                  <p className="text-sm text-stone-800 font-medium mt-1">{detailData.kontak || '-'}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-stone-500 uppercase tracking-wider">Email</p>
+                  <p className="text-sm text-stone-800 font-medium mt-1">{detailData.email || '-'}</p>
+                </div>
+                <div className="sm:col-span-2 mt-2 pt-4 border-t border-stone-200">
+                  <p className="text-xs font-semibold text-stone-500 uppercase tracking-wider">Alamat Lengkap</p>
+                  <p className="text-sm text-stone-800 font-medium mt-1 leading-relaxed">{detailData.alamat || '-'}</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-8 flex justify-end">
+              <button
+                onClick={() => setShowDetailModal(false)}
+                className="bg-stone-900 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-stone-800 transition shadow-sm"
+              >
+                Tutup
+              </button>
+            </div>
           </div>
         </div>
       )}

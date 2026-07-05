@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { pelatihanAPI } from "../../../../services/api";
+import { lpkPortalAPI } from "../../../../services/api";
 import {
   ArrowLeft,
   Save,
@@ -37,7 +37,7 @@ const handleSubmit = async (e) => {
     setLoading(true);
 
     try {
-      await pelatihanAPI.create(form);
+      await lpkPortalAPI.pelatihan.create(form);
       alert("Pelatihan berhasil ditambahkan.");
       navigate("/lpk/pelatihan");
     } catch (err) {
