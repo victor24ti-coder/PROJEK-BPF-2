@@ -311,25 +311,25 @@ return (
               className="w-full border rounded-lg px-4 py-3"
             >
 
-              <option value="Dibuka">
+              <option value="dibuka">
 
                 Dibuka
 
               </option>
 
-              <option value="Aktif">
+              <option value="aktif">
 
                 Aktif
 
               </option>
 
-              <option value="Selesai">
+              <option value="selesai">
 
                 Selesai
 
               </option>
 
-              <option value="Ditutup">
+              <option value="ditutup">
 
                 Ditutup
 
