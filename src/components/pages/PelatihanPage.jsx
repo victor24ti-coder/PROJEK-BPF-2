@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, Loader2, AlertTriangle, BookOpen, Eye, Award, GraduationCap, Users, Edit2, Trash2 } from "lucide-react";
+import { Search, Loader2, AlertTriangle, BookOpen, Eye, Award, GraduationCap, Users, Edit2, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { pelatihanAPI, lpkAPI } from "../../services/api";
 
 const emptyForm = {
@@ -35,35 +35,40 @@ export default function PelatihanPage() {
   // State untuk ringkasan stats
   const [stats, setStats] = useState({ total: 0, berjalan: 0, selesai: 0, peserta: 0 });
 
-  const fetchData = async (keyword = "") => {
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const [meta, setMeta] = useState({ current_page: 1, last_page: 1, total: 0 });
+
+  const fetchData = async (keyword = search, pg = page) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await pelatihanAPI.getAll();
-      const rawData = res.data.data ?? [];
-
-      // Filter berdasarkan kata kunci pencarian (lokal agar fleksibel)
-      const filtered = rawData.filter((item) =>
-        item.nama_pelatihan.toLowerCase().includes(keyword.toLowerCase()) ||
-        item.jenis_pelatihan.toLowerCase().includes(keyword.toLowerCase()) ||
-        item.jurusan.toLowerCase().includes(keyword.toLowerCase()) ||
-        (item.lpk?.nama_lpk || "").toLowerCase().includes(keyword.toLowerCase())
-      );
-
-      setData(filtered);
-
-      // Hitung stats
-      const total = rawData.length;
-      const berjalan = rawData.filter((item) => item.status === "aktif").length;
-      const selesai = rawData.filter((item) => item.status === "selesai").length;
-      const peserta = rawData.reduce((acc, curr) => acc + (curr.peserta?.length || 0), 0);
-      setStats({ total, berjalan, selesai, peserta });
+      const res = await pelatihanAPI.getAll('true', keyword, '', pg);
+      const payload = res.data.data;
+      setData(payload.data ?? []);
+      setMeta({
+        current_page: payload.current_page ?? 1,
+        last_page: payload.last_page ?? 1,
+        total: payload.total ?? 0,
+      });
     } catch (err) {
       setError("Gagal memuat data pelatihan dari server.");
       setData([]);
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchStats = async () => {
+    try {
+      const res = await pelatihanAPI.getAll('false');
+      const rawData = res.data.data ?? [];
+      const total = rawData.length;
+      const berjalan = rawData.filter((item) => item.status === "aktif").length;
+      const selesai = rawData.filter((item) => item.status === "selesai").length;
+      const peserta = rawData.reduce((acc, curr) => acc + (curr.peserta?.length || 0), 0);
+      setStats({ total, berjalan, selesai, peserta });
+    } catch {}
   };
 
   const fetchLpks = async () => {
@@ -81,13 +86,18 @@ export default function PelatihanPage() {
   };
 
   useEffect(() => {
-    fetchData();
+    fetchData(search, page);
+  }, [page]);
+
+  useEffect(() => {
+    fetchStats();
     fetchLpks();
   }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
-    fetchData(search);
+    setPage(1);
+    fetchData(search, 1);
   };
 
   const openTambah = () => {
@@ -268,7 +278,7 @@ export default function PelatihanPage() {
               <input
                 type="text"
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => { setSearch(e.target.value); setPage(1); fetchData(e.target.value, 1); }}
                 placeholder="Cari kelas, kejuruan, atau LPK..."
                 className="w-full pl-9 pr-4 py-2 text-sm bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
               />
@@ -337,7 +347,7 @@ export default function PelatihanPage() {
                   data.map((item, index) => (
                     <tr key={item.id} className="hover:bg-stone-50/50 transition-colors duration-150">
                       <td className="px-6 py-4 text-sm font-medium text-stone-600">
-                        {index + 1}.
+                        {(meta.current_page - 1) * 10 + index + 1}.
                       </td>
                       <td className="px-6 py-4 text-sm">
                         <Link
@@ -403,6 +413,32 @@ export default function PelatihanPage() {
               </tbody>
             </table>
           </div>
+
+          {/* Pagination */}
+          {meta.last_page > 1 && (
+            <div className="px-6 py-4 border-t border-stone-100 flex items-center justify-between">
+              <p className="text-xs text-stone-500">
+                Halaman {meta.current_page} dari {meta.last_page}
+                <span className="ml-2 text-stone-400">(Total: {meta.total} pelatihan)</span>
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={meta.current_page === 1}
+                  className="p-2 rounded-lg border border-stone-200 hover:bg-stone-50 disabled:opacity-40 transition cursor-pointer"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                <button
+                  onClick={() => setPage((p) => Math.min(meta.last_page, p + 1))}
+                  disabled={meta.current_page === meta.last_page}
+                  className="p-2 rounded-lg border border-stone-200 hover:bg-stone-50 disabled:opacity-40 transition cursor-pointer"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

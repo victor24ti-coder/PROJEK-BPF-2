@@ -79,7 +79,12 @@ export const authAPI = {
  * Pelatihan API Endpoints (untuk Admin/semua role)
  */
 export const pelatihanAPI = {
-  getAll: () => API.get('/lpk/pelatihan'),
+  getAll: (paginate = 'true', search = '', status = '', page = 1) => {
+    const params = new URLSearchParams({ paginate, page });
+    if (search) params.append('search', search);
+    if (status) params.append('status', status);
+    return API.get(`/lpk/pelatihan?${params.toString()}`);
+  },
   getById: (id) => API.get(`/lpk/pelatihan/${id}`),
   create: (data) => API.post('/lpk/pelatihan', data),
   update: (id, data) => API.put(`/lpk/pelatihan/${id}`, data),
@@ -200,7 +205,7 @@ export const jobFairAPI = {
 
 // ── Tenaga Kerja ──────────────────────────────────────────
 export const tenagaKerjaAPI = {
-  getAll: (paginate = 'true', search = '') => API.get(`/tenaga-kerja?paginate=${paginate}&search=${search}`),
+  getAll: (paginate = 'true', search = '', page = 1) => API.get(`/tenaga-kerja?paginate=${paginate}&search=${search}&page=${page}`),
   getById: (id) => API.get(`/tenaga-kerja/${id}`),
   create: (data) => API.post('/tenaga-kerja', data),
   update: (id, data) => API.put(`/tenaga-kerja/${id}`, data),
@@ -240,7 +245,12 @@ export const tracerStudyAPI = {
 
 // ── Users Management ──────────────────────────────────────────
 export const usersAPI = {
-  getAll: () => API.get('/users'),
+  getAll: (search = '', role = 'all', page = 1) => {
+    const params = new URLSearchParams({ page });
+    if (search) params.append('search', search);
+    if (role && role !== 'all') params.append('role', role);
+    return API.get(`/users?${params.toString()}`);
+  },
   getById: (id) => API.get(`/users/${id}`),
   create: (data) => API.post('/users', data),
   update: (id, data) => API.put(`/users/${id}`, data),
