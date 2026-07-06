@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import API, { tenagaKerjaAPI } from '../../services/api';
 
 const emptyForm = {
@@ -24,6 +25,10 @@ export default function TenagaKerjaPage() {
   const [errors, setErrors]     = useState({});
   const [saving, setSaving]     = useState(false);
 
+  // Pagination state
+  const [page, setPage]         = useState(1);
+  const [meta, setMeta]         = useState({ current_page: 1, last_page: 1, total: 0 });
+
   // Detail state
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [detailData, setDetailData] = useState(null);
@@ -33,11 +38,17 @@ export default function TenagaKerjaPage() {
   const [deleteNama, setDeleteNama] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  const fetchData = async (keyword = '') => {
+  const fetchData = async (keyword = '', pg = page) => {
     setLoading(true);
     try {
-      const res = await tenagaKerjaAPI.getAll('false', keyword);
-      setData(res.data.data ?? []);
+      const res = await tenagaKerjaAPI.getAll('true', keyword, pg);
+      const payload = res.data.data;
+      setData(payload.data ?? []);
+      setMeta({
+        current_page: payload.current_page ?? 1,
+        last_page: payload.last_page ?? 1,
+        total: payload.total ?? 0,
+      });
     } catch {
       setData([]);
     } finally {
@@ -45,11 +56,14 @@ export default function TenagaKerjaPage() {
     }
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => {
+    fetchData(search, page);
+  }, [page]);
 
   const handleSearch = (e) => {
     e.preventDefault();
-    fetchData(search);
+    setPage(1);
+    fetchData(search, 1);
   };
 
   const openTambah = () => {
@@ -221,7 +235,9 @@ export default function TenagaKerjaPage() {
             ) : (
               data.map((item, i) => (
                 <tr key={item.id} className="border-t border-stone-100 hover:bg-stone-50 transition">
-                  <td className="px-4 py-3 text-stone-400">{i + 1}</td>
+                  <td className="px-4 py-3 text-stone-400">
+                    {(meta.current_page - 1) * 10 + i + 1}
+                  </td>
                   <td className="px-4 py-3">
                     {item.foto ? (
                       <img
@@ -273,6 +289,31 @@ export default function TenagaKerjaPage() {
             )}
           </tbody>
         </table>
+
+        {/* Pagination */}
+        {meta.last_page > 1 && (
+          <div className="px-5 py-4 border-t border-stone-150 flex items-center justify-between">
+            <p className="text-xs text-stone-500">
+              Halaman {meta.current_page} dari {meta.last_page} (Total: {meta.total} data)
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={meta.current_page === 1}
+                className="p-2 rounded-lg border border-stone-200 hover:bg-stone-50 disabled:opacity-40 transition cursor-pointer"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <button
+                onClick={() => setPage((p) => Math.min(meta.last_page, p + 1))}
+                disabled={meta.current_page === meta.last_page}
+                className="p-2 rounded-lg border border-stone-200 hover:bg-stone-50 disabled:opacity-40 transition cursor-pointer"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Modal Tambah / Edit */}

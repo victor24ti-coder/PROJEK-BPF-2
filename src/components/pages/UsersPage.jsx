@@ -218,6 +218,10 @@ export default function UsersPage() {
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
 
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const [meta, setMeta] = useState({ current_page: 1, last_page: 1, total: 0 });
+
   const [deleteId, setDeleteId] = useState(null);
   const [deleteNama, setDeleteNama] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -230,11 +234,17 @@ export default function UsersPage() {
 
   const cardRef = useRef(null);
 
-  const fetchData = async () => {
+  const fetchData = async (kw = search, role = roleFilter, pg = page) => {
     setLoading(true);
     try {
-      const res = await usersAPI.getAll();
-      setData(res.data.data ?? []);
+      const res = await usersAPI.getAll(kw, role, pg);
+      const payload = res.data.data;
+      setData(payload.data ?? []);
+      setMeta({
+        current_page: payload.current_page ?? 1,
+        last_page: payload.last_page ?? 1,
+        total: payload.total ?? 0,
+      });
     } catch (err) {
       console.error(err);
       setData([]);
@@ -243,7 +253,7 @@ export default function UsersPage() {
     }
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { fetchData(search, roleFilter, page); }, [page]);
 
   const openTambah = () => {
     setEditId(null);
@@ -367,13 +377,11 @@ export default function UsersPage() {
     }
   };
 
-  const filteredData = data.filter((item) => {
-    const matchesSearch =
-      item.nama?.toLowerCase().includes(search.toLowerCase()) ||
-      item.email?.toLowerCase().includes(search.toLowerCase());
-    const matchesRole = roleFilter === 'all' || item.role === roleFilter;
-    return matchesSearch && matchesRole;
-  });
+  // Search/filter handler — reset to page 1 when filters change
+  const handleFilterChange = (newSearch, newRole) => {
+    setPage(1);
+    fetchData(newSearch, newRole, 1);
+  };
 
   const getRoleBadge = (role) => {
     switch (role) {
@@ -425,7 +433,7 @@ export default function UsersPage() {
             type="text"
             placeholder="Cari berdasarkan nama atau email..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => { setSearch(e.target.value); handleFilterChange(e.target.value, roleFilter); }}
             className="w-full pl-10 pr-4 py-2 text-sm border border-stone-300 rounded-lg outline-none focus:ring-2"
             style={{ '--tw-ring-color': BRAND.blueLight }}
           />
@@ -433,7 +441,7 @@ export default function UsersPage() {
         <div className="w-full md:w-48">
           <select
             value={roleFilter}
-            onChange={(e) => setRoleFilter(e.target.value)}
+            onChange={(e) => { setRoleFilter(e.target.value); handleFilterChange(search, e.target.value); }}
             className="w-full px-3 py-2 text-sm border border-stone-300 rounded-lg outline-none bg-white"
           >
             <option value="all">Semua Role</option>
@@ -465,10 +473,10 @@ export default function UsersPage() {
                     <span>Memuat data pengguna...</span>
                   </div>
                 </td></tr>
-              ) : filteredData.length === 0 ? (
+              ) : data.length === 0 ? (
                 <tr><td colSpan={5} className="text-center py-12 text-stone-400">Tidak ada pengguna ditemukan.</td></tr>
               ) : (
-                filteredData.map((item) => {
+                data.map((item) => {
                   const badge = getRoleBadge(item.role);
                   return (
                     <tr key={item.id} className="hover:bg-stone-50 transition-colors">
@@ -516,6 +524,36 @@ export default function UsersPage() {
             </tbody>
           </table>
         </div>
+
+        {/* ── Pagination ── */}
+        {meta.last_page > 1 && (
+          <div className="px-6 py-4 border-t border-stone-100 flex items-center justify-between">
+            <p className="text-xs text-stone-500">
+              Halaman {meta.current_page} dari {meta.last_page}
+              <span className="ml-2 text-stone-400">(Total: {meta.total} pengguna)</span>
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={meta.current_page === 1}
+                className="p-2 rounded-lg border border-stone-200 hover:bg-stone-50 disabled:opacity-40 transition cursor-pointer"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-stone-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button
+                onClick={() => setPage((p) => Math.min(meta.last_page, p + 1))}
+                disabled={meta.current_page === meta.last_page}
+                className="p-2 rounded-lg border border-stone-200 hover:bg-stone-50 disabled:opacity-40 transition cursor-pointer"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-stone-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ── Modal Tambah / Edit ─────────────────────────────────────────────── */}
